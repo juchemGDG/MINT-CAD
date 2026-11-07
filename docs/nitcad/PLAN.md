@@ -14,7 +14,8 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 0. Vorbereitung (Repo, Plan, Design-Tokens)                       <- erledigt
 1. Baseline bauen (pixi, macOS arm64) und Build-Anleitung        <- erledigt
 2. Umfang reduzieren (ein Modul je Commit)                      <- erledigt: BIM, CAM, Robot, OpenSCAD, ReverseEngineering, Inspection, Points, Surface aus; Mesh bleibt (STL für 3D-Druck)
-3. Workbench "Schule": Skizze -> Körper -> Zeichnung (+ Draft, Assembly, FEM erreichbar)
+3. Vereinfachte Workbenches (Mod/MintCAD, WorkbenchManipulator)       <- erledigt: Part Design, Sketcher, TechDraw, Draft, FEM, Assembly gekürzt
+   (Abweichung: keine neue Gesamt-Workbench, da Skizzen-Leisten an Sketcher/PartDesign hängen)
 4. Oberfläche vereinfachen (Menüs, Einstellungen, Startseite, Deutsch)
 5. Modernes Design (Qt-Stylesheet hell/dunkel, Icons, 3D-Ansicht)
 6. Unterrichtshilfen (Vorlagen, Beispiele, Hilfe)
@@ -23,3 +24,7 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 
 ## Commit-Konventionen
 `docs:`, `build:`, `feat:`, `style:`, `chore:` – ein Thema pro Commit, Start jeweils geprüft.
+
+## Ausgeblendete Befehle wieder einblenden
+Liste in `src/Mod/MintCAD/MintCADSimplify.py` (HIDE_TOOLBARS, HIDE_COMMANDS, REPLACE_GROUPS):
+Eintrag löschen, neu bauen. Die Befehle bleiben unter Einstellungen > Anpassen immer erreichbar.
