@@ -10,6 +10,10 @@ import FreeCADGui as Gui
 
 # Ganze Werkzeugleisten (interne Namen)
 HIDE_TOOLBARS = [
+    # TechDraw: Zusatzleisten der Extension
+    "TechDraw Attributes",
+    "TechDraw Extend Dimensions",
+    "TechDraw Stacking",
 ]
 
 # Einzelne Befehle (aus Werkzeugleisten und Menüs)
@@ -29,6 +33,15 @@ HIDE_COMMANDS = [
     "PartDesign_Thickness",
     "PartDesign_Draft",
     "PartDesign_MultiTransform",
+    # TechDraw: selten benötigte Ansichten, Hilfen und Symbole
+    "TechDraw_BrokenView",
+    "TechDraw_ActiveView",
+    "TechDraw_DraftView",
+    "TechDraw_ClipGroup",
+    "TechDraw_AxoLengthDimension",
+    "TechDraw_DimensionRepair",
+    "TechDraw_RichTextAnnotation",
+    "TechDraw_WeldSymbol",
 ]
 
 
