@@ -216,8 +216,9 @@ def main():
     if not files:
         for d in SRC_DIRS:
             full = os.path.join(ROOT, d)
-            if os.path.isdir(full):
-                files += [os.path.join(full, f) for f in sorted(os.listdir(full)) if f.endswith(".svg")]
+            for base, dirs, names in os.walk(full):
+                dirs.sort()
+                files += [os.path.join(base, f) for f in sorted(names) if f.endswith(".svg")]
     seen = set()
     done = 0
     for f in files:
