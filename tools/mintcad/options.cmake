@@ -2,3 +2,4 @@
 # Jede Zeile entspricht einem eigenen Commit der Reduktion (siehe docs/nitcad/PLAN.md).
 set(BUILD_BIM OFF CACHE BOOL "MINT-CAD: BIM deaktiviert" FORCE)
 set(BUILD_CAM OFF CACHE BOOL "MINT-CAD: CAM deaktiviert" FORCE)
+set(BUILD_ROBOT OFF CACHE BOOL "MINT-CAD: Robot deaktiviert" FORCE)
