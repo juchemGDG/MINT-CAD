@@ -84,8 +84,13 @@
     </message>
     <message>
       <location filename="../../StartView.cpp" line="229"/>
-      <source>BIM/Architecture</source>
-      <translation>BIM/Architektur</translation>
+      <source>Sketch, build, draw</source>
+      <translation>Skizzieren, Konstruieren, Zeichnen</translation>
+    </message>
+    <message>
+      <location filename="../../StartView.cpp" line="229"/>
+      <source>Technical Drawing</source>
+      <translation>Technische Zeichnung</translation>
     </message>
     <message>
       <location filename="../../StartView.cpp" line="206"/>
@@ -119,8 +124,8 @@
     </message>
     <message>
       <location filename="../../StartView.cpp" line="230"/>
-      <source>Creates an architectural project</source>
-      <translation>Erstellt ein Architekturprojekt</translation>
+      <source>Creates a document for technical drawings</source>
+      <translation>Erstellt ein Dokument für technische Zeichnungen</translation>
     </message>
     <message>
       <location filename="../../StartView.cpp" line="509"/>

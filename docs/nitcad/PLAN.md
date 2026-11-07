@@ -20,7 +20,8 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
    offen: Einstellungsdialog kürzen (braucht C++-Eingriff), vertagt
 5. Modernes Design (Theme "MINT-CAD": Stylesheet + Preference-Pack)    <- Teil 1 erledigt: Farben, Docks, Dialoge, Akzentblau;
    Icons: tools/mintcad/make_icons.py erzeugt beim Bauen einen flachen Icon-Satz (<Home>/icons hat Vorrang);
-   offen: Startseiten-Icons (direkt aus Qt-Ressourcen), Feinschliff, Einstellungsdialog;
+   Startseite: MINT-CAD-Kopf, neue Icons, ohne Einrichtungsassistent, BIM-/Test-Beispiele entfernt;
+   offen: Einstellungsdialog;
    bekanntes Problem (auch ohne MINT-CAD-Theme): schwarze Hintergründe bei Sketcher-Constraint-Symbolen auf macOS
 6. Unterrichtshilfen (Vorlagen, Beispiele, Hilfe)
 7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)

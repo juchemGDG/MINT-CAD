@@ -113,6 +113,9 @@ StartView::StartView(QWidget* parent)
     auto documentsContentLayout = gsl::owner<QVBoxLayout*>(new QVBoxLayout(documentsScrollWidget));
     documentsContentLayout->setSizeConstraint(QLayout::SizeConstraint::SetMinAndMaxSize);
 
+    _headerLabel = gsl::owner<QLabel*>(new QLabel());
+    documentsContentLayout->addWidget(_headerLabel);
+
     _newFileLabel = gsl::owner<QLabel*>(new QLabel());
     documentsContentLayout->addWidget(_newFileLabel);
 
@@ -172,6 +175,8 @@ StartView::StartView(QWidget* parent)
     );
     connect(_showOnStartupCheckBox, &QCheckBox::toggled, this, &StartView::showOnStartupChanged);
 
+    // MINT-CAD: Einrichtungsassistent ist nicht vorgesehen (Voreinstellungen kommen von MINT-CAD)
+    _openFirstStart->setVisible(false);
     footerLayout->addWidget(_openFirstStart);
     footerLayout->addStretch();
     footerLayout->addWidget(_showOnStartupCheckBox);
@@ -205,30 +210,30 @@ void StartView::configureNewFileButtons(QLayout* layout) const
     auto newEmptyFile = gsl::owner<NewFileButton*>(new NewFileButton(
         {tr("Empty File"),
          tr("Creates a new empty FreeCAD file"),
-         QLatin1String(":/icons/document-new.svg")}
+         QLatin1String("icons:document-new.svg")}
     ));
     auto openFile = gsl::owner<NewFileButton*>(new NewFileButton(
         {tr("Open File"),
          tr("Opens an existing CAD file or 3D model"),
-         QLatin1String(":/icons/document-open.svg")}
+         QLatin1String("icons:document-open.svg")}
     ));
     auto partDesign = gsl::owner<NewFileButton*>(new NewFileButton(
         {tr("Parametric Body"),
          tr("Creates a body with the Part Design workbench"),
-         QLatin1String(":/icons/PartDesignWorkbench.svg")}
+         QLatin1String("icons:PartDesign_Body.svg")}
     ));
     auto assembly = gsl::owner<NewFileButton*>(new NewFileButton(
         {tr("Assembly"),
          tr("Creates an assembly project"),
-         QLatin1String(":/icons/AssemblyWorkbench.svg")}
+         QLatin1String("icons:Geoassembly.svg")}
     ));
     auto draft = gsl::owner<NewFileButton*>(new NewFileButton(
-        {tr("2D Draft"), tr("Creates a 2D Draft document"), QLatin1String(":/icons/DraftWorkbench.svg")}
+        {tr("2D Draft"), tr("Creates a 2D Draft document"), QLatin1String("icons:Draft_Wire.svg")}
     ));
     auto techDraw = gsl::owner<NewFileButton*>(new NewFileButton(
         {tr("Technical Drawing"),
          tr("Creates a document for technical drawings"),
-         QLatin1String(":/icons/TechDraw_TreePage.svg")}
+         QLatin1String("icons:actions/TechDraw_PageDefault.svg")}
     ));
 
     // TODO: Ensure all of the required WBs are actually available
@@ -495,6 +500,11 @@ void StartView::retranslateUi()
     const QLatin1String h1Start("<h1>");
     const QLatin1String h1End("</h1>");
 
+    _headerLabel->setText(
+        QStringLiteral("<div style='font-size:32px;font-weight:bold;'>MINT-CAD</div>"
+                       "<div style='font-size:14px;color:#94a3b8;'>")
+        + tr("Sketch, build, draw") + QStringLiteral("</div>")
+    );
     _newFileLabel->setText(h1Start + tr("New File") + h1End);
     _examplesLabel->setText(h1Start + tr("Examples") + h1End);
     _recentFilesLabel->setText(h1Start + tr("Recent Files") + h1End);
