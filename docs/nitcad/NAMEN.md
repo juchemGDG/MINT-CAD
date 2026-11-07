@@ -1,4 +1,6 @@
-# Namensvorschläge (kein „FreeCAD“ im Produktnamen)
+# Name: MINT-CAD (entschieden)
+
+Alternativen waren:
 
 1. **MINT-CAD** – passt zu mint-checker.de / PAP Editor, sofort verständlich. (Empfehlung)
 2. **SchulCAD** – eindeutig, aber wenig eigenständig.

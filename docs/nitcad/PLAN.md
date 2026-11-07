@@ -1,6 +1,7 @@
-# NITCAD – FreeCAD für den Schulunterricht
+# MINT-CAD – FreeCAD für den Schulunterricht
 
 Basis: FreeCAD 1.1.4 (LGPL-2.1+). Branch `nitcad` (Änderungen), Tag `1.1.4` = unveränderte Basis.
+Entwicklung auf SSD (APFS-Sparsebundle /Volumes/T7/MINTCAD.sparsebundle, Volume "MINTCAD").
 Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 
 ## Entscheidungen
