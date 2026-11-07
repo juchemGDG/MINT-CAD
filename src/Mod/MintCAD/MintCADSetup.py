@@ -31,6 +31,8 @@ DISABLED_WORKBENCHES = [
 
 
 THEME_PACK = "MINT-CAD"
+# Erhöhen, wenn sich das Theme ändert: wird dann einmal neu angewendet (ohne andere Einstellungen anzufassen).
+THEME_VERSION = 2
 
 
 def _apply_cfg_group(node, grp):
@@ -69,6 +71,9 @@ def apply_defaults():
     """Setzt die Schul-Voreinstellungen einmal je SETUP_VERSION (Nutzer können sie danach ändern)."""
     mint = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/MintCAD")
     if mint.GetInt("SetupVersion", 0) >= SETUP_VERSION:
+        if mint.GetInt("ThemeVersion", 0) < THEME_VERSION:
+            apply_theme()
+            mint.SetInt("ThemeVersion", THEME_VERSION)
         return
 
     # Workbench-Auswahl und Reihenfolge
@@ -87,6 +92,7 @@ def apply_defaults():
 
     # Design (Theme): Stylesheet wird beim nächsten Start geladen
     apply_theme()
+    mint.SetInt("ThemeVersion", THEME_VERSION)
 
     # Sprache sofort umschalten (sonst erst beim nächsten Start wirksam)
     try:
