@@ -223,15 +223,29 @@ def main():
     done = 0
     for f in files:
         name = os.path.basename(f)
-        if name in seen:
+        # Pfad relativ zum Icon-Wurzelordner (Icons wie "actions/TechDraw_View" liegen in Unterordnern)
+        rel = name
+        for d in SRC_DIRS:
+            full = os.path.join(ROOT, d)
+            if os.path.abspath(f).startswith(full + os.sep):
+                rel = os.path.relpath(f, full)
+                break
+        targets = {name, rel}
+        if all(t in seen for t in targets):
             continue
-        seen.add(name)
         try:
-            convert(f, os.path.join(out, name))
+            for t in targets:
+                if t not in seen:
+                    convert(f, os.path.join(out, t))
+                    seen.add(t)
             done += 1
         except Exception as exc:  # defektes SVG überspringen
             print("übersprungen:", name, exc)
     print("%d Icons erzeugt" % done)
+    # Handgezeichnete Icons überschreiben die umgefärbten Originale
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import hand_icons
+    print("%d handgezeichnete Icons" % hand_icons.write(out))
     return 0
 
 
