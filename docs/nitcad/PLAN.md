@@ -18,7 +18,8 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
    (Abweichung: keine neue Gesamt-Workbench, da Skizzen-Leisten an Sketcher/PartDesign hängen)
 4. Oberfläche vereinfachen                                          <- erledigt: Startseite (BIM-Knopf -> Technische Zeichnung), Deutsch/mm als Voreinstellung, Makro-Menü weg;
    offen: Einstellungsdialog kürzen (braucht C++-Eingriff), vertagt
-5. Modernes Design (Qt-Stylesheet hell/dunkel, Icons, 3D-Ansicht)
+5. Modernes Design (Theme "MINT-CAD": Stylesheet + Preference-Pack)    <- Teil 1 erledigt: Farben, Docks, Dialoge, Akzentblau;
+   offen: Icon-Set, 3D-Ansicht prüfen/feinschleifen, Einstellungsdialog
 6. Unterrichtshilfen (Vorlagen, Beispiele, Hilfe)
 7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)
 8. Test mit Schülern, Upstream-Pflege
