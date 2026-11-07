@@ -14,6 +14,11 @@ HIDE_TOOLBARS = [
     "TechDraw Attributes",
     "TechDraw Extend Dimensions",
     "TechDraw Stacking",
+    # FEM: Elektromagnetik, Strömung, Wärme und Spezialanalysen (Schwerpunkt: Statik)
+    "Electromagnetic Boundary Conditions",
+    "Fluid Boundary Conditions",
+    "Thermal Boundary Conditions and Loads",
+    "Geometrical Analysis Features",
 ]
 
 # Einzelne Befehle (aus Werkzeugleisten und Menüs)
@@ -76,6 +81,36 @@ HIDE_COMMANDS = [
     "Sketcher_CreatePeriodicBSpline",
     "Sketcher_CreateBSplineByInterpolation",
     "Sketcher_CreatePeriodicBSplineByInterpolation",
+    # FEM: Material, Elemente, Randbedingungen
+    "FEM_MaterialFluid",
+    "FEM_MaterialMechanicalNonlinear",
+    "FEM_MaterialReinforced",
+    "FEM_ElementRotation1D",
+    "FEM_ElementFluid1D",
+    "FEM_ConstraintRigidBody",
+    "FEM_ConstraintTie",
+    "FEM_ConstraintSpring",
+    "FEM_ConstraintCentrif",
+    # FEM: Netz und Löser
+    "FEM_MeshBoundaryLayer",
+    "FEM_MeshRegion",
+    "FEM_MeshGroup",
+    "FEM_FEMMesh2Mesh",
+    "FEM_CompEmEquations",
+    "FEM_EquationFlow",
+    "FEM_EquationFlux",
+    "FEM_EquationHeat",
+    # FEM: Ergebnisfilter (Verformung, Konturen und Linienauswertung bleiben)
+    "FEM_PostBranchFilter",
+    "FEM_PostFilterClipScalar",
+    "FEM_PostFilterCutFunction",
+    "FEM_PostFilterClipRegion",
+    "FEM_PostFilterGlyph",
+    "FEM_PostFilterLinearizedStresses",
+    "FEM_PostFilterDataAtPoint",
+    "FEM_PostFilterCalculator",
+    "FEM_PostCreateFunctions",
+    "FEM_PostVisualization",
 ]
 
 
