@@ -3,7 +3,7 @@
 
 import MintCADSetup
 
-MintCADSetup.apply_workbench_selection()
+MintCADSetup.apply_defaults()
 
 import MintCADSimplify
 
