@@ -1,8 +1,8 @@
 
 SET(Examples_Files
-    Schenkel.stp
-    EngineBlock.FCStd
-    PartDesignExample.FCStd
+    01_Winkelstueck.FCStd
+    02_Welle.FCStd
+    03_Platte.FCStd
     FEMExample.FCStd
     AssemblyExample.FCStd
     FCPAT.pat
