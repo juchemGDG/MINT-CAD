@@ -67,12 +67,36 @@ HIDE_COMMANDS = [
     "Draft_AddToGroup",
     "Draft_AddConstruction",
     "Draft_WorkingPlaneProxy",
+    # Sketcher: Ellipsen, Hyperbeln, Parabeln und weitere B-Spline-Varianten
+    "Sketcher_CreateEllipseByCenter",
+    "Sketcher_CreateEllipseBy3Points",
+    "Sketcher_CreateArcOfEllipse",
+    "Sketcher_CreateArcOfHyperbola",
+    "Sketcher_CreateArcOfParabola",
+    "Sketcher_CreatePeriodicBSpline",
+    "Sketcher_CreateBSplineByInterpolation",
+    "Sketcher_CreatePeriodicBSplineByInterpolation",
 ]
+
+
+# Sammelbefehle (Aufklappmenüs), deren Einträge sich nicht einzeln ausblenden lassen,
+# werden in den Werkzeugleisten durch die gewünschten Einzelbefehle ersetzt.
+REPLACE_GROUPS = {
+    # Sketcher: nur Kreise (keine Ellipsen/Hyperbeln/Parabeln), nur der einfache B-Spline
+    "Sketcher_CompCreateConic": ["Sketcher_CreateCircle", "Sketcher_Create3PointCircle"],
+    "Sketcher_CompCreateBSpline": ["Sketcher_CreateBSpline"],
+}
 
 
 class _Simplifier:
     def modifyToolBars(self):
-        return [{"remove": name} for name in HIDE_TOOLBARS + HIDE_COMMANDS]
+        actions = []
+        for group, singles in REPLACE_GROUPS.items():
+            for single in singles:
+                actions.append({"insert": single, "toolItem": group})
+            actions.append({"remove": group})
+        actions += [{"remove": name} for name in HIDE_TOOLBARS + HIDE_COMMANDS]
+        return actions
 
     def modifyMenuBar(self):
         return [{"remove": name} for name in HIDE_COMMANDS]
