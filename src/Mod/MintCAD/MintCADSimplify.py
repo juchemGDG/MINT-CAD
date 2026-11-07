@@ -111,6 +111,11 @@ HIDE_COMMANDS = [
     "FEM_PostFilterCalculator",
     "FEM_PostCreateFunctions",
     "FEM_PostVisualization",
+    # Assembly: Simulation und Spezialgelenke (Fest, Dreh, Schub, Kugel u. a. bleiben)
+    "Assembly_CreateSimulation",
+    "Assembly_CreateJointRackPinion",
+    "Assembly_CreateJointScrew",
+    "Assembly_CreateJointGearBelt",
 ]
 
 
