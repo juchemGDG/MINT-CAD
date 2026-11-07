@@ -42,6 +42,31 @@ HIDE_COMMANDS = [
     "TechDraw_DimensionRepair",
     "TechDraw_RichTextAnnotation",
     "TechDraw_WeldSymbol",
+    # Draft: Erzeugen
+    "Draft_Facebinder",
+    "Draft_ShapeString",
+    "Draft_Hatch",
+    "Draft_BSpline",
+    "Draft_BezierTools",
+    # Draft: Ändern
+    "Draft_Stretch",
+    "Draft_Clone",
+    "Draft_SubelementHighlight",
+    "Draft_Join",
+    "Draft_Split",
+    "Draft_Upgrade",
+    "Draft_Downgrade",
+    "Draft_WireToBSpline",
+    "Draft_Slope",
+    "Draft_FlipDimension",
+    "Draft_Shape2DView",
+    # Draft: Hilfsmittel
+    "Draft_AnnotationStyleEditor",
+    "Draft_AddNamedGroup",
+    "Draft_SelectGroup",
+    "Draft_AddToGroup",
+    "Draft_AddConstruction",
+    "Draft_WorkingPlaneProxy",
 ]
 
 
