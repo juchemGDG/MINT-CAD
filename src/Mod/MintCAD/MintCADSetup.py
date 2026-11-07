@@ -8,7 +8,7 @@ import FreeCAD
 import FreeCADGui as Gui
 
 # Erhöhen, wenn sich die Voreinstellungen ändern: dann werden sie beim nächsten Start einmal neu gesetzt.
-SETUP_VERSION = 3
+SETUP_VERSION = 4
 
 # Reihenfolge der sichtbaren Workbenches (Arbeitsablauf: Konstruieren -> Zeichnung -> ...)
 ENABLED_WORKBENCHES = [
@@ -89,6 +89,12 @@ def apply_defaults():
     start = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Start")
     start.SetBool("FirstStart2024", False)
     start.SetBool("ShowExamples", True)
+
+    # TechDraw: Schulvorlage als Standard-Zeichenblatt
+    tpl_dir = os.path.join(FreeCAD.getResourceDir(), "Mod", "TechDraw", "Templates", "MINT-CAD")
+    files = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/TechDraw/Files")
+    files.SetString("TemplateDir", tpl_dir)
+    files.SetString("TemplateFile", os.path.join(tpl_dir, "MINTCAD_A4_Querformat.svg"))
 
     # Design (Theme): Stylesheet wird beim nächsten Start geladen
     apply_theme()
