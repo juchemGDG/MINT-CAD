@@ -67,6 +67,7 @@ SET(StartGui_SRCS
 SET(StartGuiIcon_SVG
         Resources/icons/StartCommandIcon.svg
         Resources/icons/PartDesignWorkbench.svg
+        Resources/icons/TechDraw_TreePage.svg
         )
 
 SET(StartGuiThumbnail_PNG

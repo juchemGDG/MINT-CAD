@@ -70,7 +70,7 @@ public:
     void openExistingFile();
     void newAssemblyFile();
     void newDraftFile();
-    void newArchFile();
+    void newTechDrawFile();
 
     bool onHasMsg(const char* pMsg) const override;
 
