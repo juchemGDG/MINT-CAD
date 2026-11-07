@@ -14,6 +14,21 @@ HIDE_TOOLBARS = [
 
 # Einzelne Befehle (aus Werkzeugleisten und Menüs)
 HIDE_COMMANDS = [
+    # Part Design: Hilfsfunktionen
+    "PartDesign_SubShapeBinder",
+    "PartDesign_Clone",
+    # Part Design: Aufbau (Loft, Rohr, Wendel sind für den Einstieg zu speziell)
+    "PartDesign_AdditiveLoft",
+    "PartDesign_AdditivePipe",
+    "PartDesign_AdditiveHelix",
+    "PartDesign_SubtractiveLoft",
+    "PartDesign_SubtractivePipe",
+    "PartDesign_SubtractiveHelix",
+    "PartDesign_Boolean",
+    # Part Design: Verrundungen und Muster
+    "PartDesign_Thickness",
+    "PartDesign_Draft",
+    "PartDesign_MultiTransform",
 ]
 
 
