@@ -179,7 +179,7 @@ StartView::StartView(QWidget* parent)
     setCentralWidget(_contents);
 
     // Set startup widget according to the first start parameter
-    auto firstStart = hGrp->GetBool("FirstStart2024", true);  // NOLINT
+    auto firstStart = hGrp->GetBool("FirstStart2024", false);  // NOLINT
     _contents->setCurrentWidget(firstStart ? firstStartScrollArea : documentsWidget);
     configureCustomFolderListWidget(customFolderListWidget);
     configureExamplesListWidget(examplesListWidget);
