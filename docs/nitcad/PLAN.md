@@ -19,7 +19,9 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 4. Oberfläche vereinfachen                                          <- erledigt: Startseite (BIM-Knopf -> Technische Zeichnung), Deutsch/mm als Voreinstellung, Makro-Menü weg;
    offen: Einstellungsdialog kürzen (braucht C++-Eingriff), vertagt
 5. Modernes Design (Theme "MINT-CAD": Stylesheet + Preference-Pack)    <- Teil 1 erledigt: Farben, Docks, Dialoge, Akzentblau;
-   offen: Icon-Set, 3D-Ansicht prüfen/feinschleifen, Einstellungsdialog
+   Icons: tools/mintcad/make_icons.py erzeugt beim Bauen einen flachen Icon-Satz (<Home>/icons hat Vorrang);
+   offen: Startseiten-Icons (direkt aus Qt-Ressourcen), Feinschliff, Einstellungsdialog;
+   bekanntes Problem (auch ohne MINT-CAD-Theme): schwarze Hintergründe bei Sketcher-Constraint-Symbolen auf macOS
 6. Unterrichtshilfen (Vorlagen, Beispiele, Hilfe)
 7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)
 8. Test mit Schülern, Upstream-Pflege
