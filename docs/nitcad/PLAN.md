@@ -23,7 +23,8 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
    Startseite: MINT-CAD-Kopf, neue Icons, ohne Einrichtungsassistent, BIM-/Test-Beispiele entfernt;
    offen: Einstellungsdialog;
    bekanntes Problem (auch ohne MINT-CAD-Theme): schwarze Hintergründe bei Sketcher-Constraint-Symbolen auf macOS
-6. Unterrichtshilfen (Vorlagen, Beispiele, Hilfe)
+6. Unterrichtshilfen                                                <- erledigt: Vorlagen A4 quer/hoch + A3 quer (Schulschriftfeld), Beispiele Winkelstück/Welle/Platte, Kurzanleitung (Hilfe-Menü);
+   Hilfsskripte: tools/mintcad/make_templates.py, make_examples.py
 7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)
 8. Test mit Schülern, Upstream-Pflege
 

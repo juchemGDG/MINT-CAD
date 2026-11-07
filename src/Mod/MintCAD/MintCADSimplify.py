@@ -30,6 +30,13 @@ HIDE_MENUS = [
 
 # Einzelne Befehle (aus Werkzeugleisten und Menüs)
 HIDE_COMMANDS = [
+    # Hilfe-Menü: Verweise auf Spenden, Entwickler- und Python-Handbuch
+    "Std_FreeCADDonation",
+    "Std_DevHandbook",
+    "Std_PythonHelp",
+    "Std_FreeCADForum",
+    "Std_ReportBug",
+    "Std_RestartInSafeMode",
     # Part Design: Hilfsfunktionen
     "PartDesign_SubShapeBinder",
     "PartDesign_Clone",
@@ -146,7 +153,9 @@ class _Simplifier:
         return actions
 
     def modifyMenuBar(self):
-        return [{"remove": name} for name in HIDE_MENUS + HIDE_COMMANDS]
+        # Kurzanleitung im Hilfe-Menü vor „Über“ einfügen
+        actions = [{"insert": "MintCAD_QuickGuide", "menuItem": "Std_About"}]
+        return actions + [{"remove": name} for name in HIDE_MENUS + HIDE_COMMANDS]
 
 
 _manipulator = None

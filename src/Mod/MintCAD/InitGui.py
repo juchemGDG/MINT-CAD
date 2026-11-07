@@ -8,3 +8,7 @@ MintCADSetup.apply_defaults()
 import MintCADSimplify
 
 MintCADSimplify.install()
+
+import MintCADHelp
+
+MintCADHelp.register()
