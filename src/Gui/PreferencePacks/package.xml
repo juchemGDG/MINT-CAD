@@ -35,5 +35,14 @@
       <tag>background</tag>
       <tag>dark</tag>
     </preferencepack>
+    <preferencepack>
+      <name>MINT-CAD</name>
+      <type>Theme</type>
+      <description>MINT-CAD: dunkle Leisten und Docks, helle 3D-Ansicht, blaue Akzente (angelehnt an den PAP Editor).</description>
+      <version>1.0.0</version>
+      <tag>built-in</tag>
+      <tag>mint-cad</tag>
+      <tag>school</tag>
+    </preferencepack>
   </content>
 </package>
