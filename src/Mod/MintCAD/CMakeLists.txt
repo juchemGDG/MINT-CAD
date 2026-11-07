@@ -20,3 +20,13 @@ INSTALL(
     DESTINATION
         Mod/MintCAD
 )
+
+# Einheitlicher MINT-CAD-Icon-Satz: aus den FreeCAD-Icons erzeugt und unter <Home>/icons abgelegt.
+# Dieser Ordner hat in der BitmapFactory Vorrang vor den eingebetteten Icons.
+set(MintCAD_ICON_DIR "${CMAKE_BINARY_DIR}/icons")
+add_custom_target(MintCADIcons ALL
+    COMMAND ${Python3_EXECUTABLE} -I "${CMAKE_SOURCE_DIR}/tools/mintcad/make_icons.py" "${MintCAD_ICON_DIR}"
+    COMMENT "MINT-CAD: Icon-Satz erzeugen"
+    VERBATIM
+)
+install(DIRECTORY "${MintCAD_ICON_DIR}/" DESTINATION icons FILES_MATCHING PATTERN "*.svg")
