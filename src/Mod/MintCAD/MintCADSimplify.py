@@ -14,11 +14,18 @@ HIDE_TOOLBARS = [
     "TechDraw Attributes",
     "TechDraw Extend Dimensions",
     "TechDraw Stacking",
+    # Makro-Leiste
+    "Macro",
     # FEM: Elektromagnetik, Strömung, Wärme und Spezialanalysen (Schwerpunkt: Statik)
     "Electromagnetic Boundary Conditions",
     "Fluid Boundary Conditions",
     "Thermal Boundary Conditions and Loads",
     "Geometrical Analysis Features",
+]
+
+# Ganze Menüs (interne Namen, englisch)
+HIDE_MENUS = [
+    "&Macro",
 ]
 
 # Einzelne Befehle (aus Werkzeugleisten und Menüs)
@@ -139,7 +146,7 @@ class _Simplifier:
         return actions
 
     def modifyMenuBar(self):
-        return [{"remove": name} for name in HIDE_COMMANDS]
+        return [{"remove": name} for name in HIDE_MENUS + HIDE_COMMANDS]
 
 
 _manipulator = None

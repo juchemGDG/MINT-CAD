@@ -16,7 +16,8 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 2. Umfang reduzieren (ein Modul je Commit)                      <- erledigt: BIM, CAM, Robot, OpenSCAD, ReverseEngineering, Inspection, Points, Surface aus; Mesh bleibt (STL für 3D-Druck)
 3. Vereinfachte Workbenches (Mod/MintCAD, WorkbenchManipulator)       <- erledigt: Part Design, Sketcher, TechDraw, Draft, FEM, Assembly gekürzt
    (Abweichung: keine neue Gesamt-Workbench, da Skizzen-Leisten an Sketcher/PartDesign hängen)
-4. Oberfläche vereinfachen (Menüs, Einstellungen, Startseite, Deutsch)
+4. Oberfläche vereinfachen                                          <- erledigt: Startseite (BIM-Knopf -> Technische Zeichnung), Deutsch/mm als Voreinstellung, Makro-Menü weg;
+   offen: Einstellungsdialog kürzen (braucht C++-Eingriff), vertagt
 5. Modernes Design (Qt-Stylesheet hell/dunkel, Icons, 3D-Ansicht)
 6. Unterrichtshilfen (Vorlagen, Beispiele, Hilfe)
 7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)
