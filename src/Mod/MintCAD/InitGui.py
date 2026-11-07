@@ -4,3 +4,7 @@
 import MintCADSetup
 
 MintCADSetup.apply_workbench_selection()
+
+import MintCADSimplify
+
+MintCADSimplify.install()

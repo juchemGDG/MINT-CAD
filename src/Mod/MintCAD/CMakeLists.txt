@@ -4,6 +4,7 @@
 SET(MintCAD_SRCS
     InitGui.py
     MintCADSetup.py
+    MintCADSimplify.py
 )
 SOURCE_GROUP("" FILES ${MintCAD_SRCS})
 
