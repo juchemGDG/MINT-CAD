@@ -30,3 +30,8 @@ Bei SDK-Wechsel `build/release` vollständig löschen (CMake-Cache enthält SDK-
 ```sh
 pixi run build/release/bin/FreeCADCmd -c "import Part, Sketcher, PartDesign, TechDraw, Draft, Fem; print('OK')"
 ```
+
+## MINT-CAD-Konfiguration
+Statt des direkten `cmake --preset ...` das Skript `tools/mintcad/configure-macos.sh` verwenden;
+es lädt `tools/mintcad/options.cmake` (abgeschaltete Module). Nach dem Abschalten eines Moduls
+alte Ausgabeordner `build/release/Mod/<Modul>` löschen, sonst wirken sie noch.

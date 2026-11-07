@@ -6,14 +6,14 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 
 ## Entscheidungen
 - Behalten: Sketcher, PartDesign, Part (Grundkörper), TechDraw, Draft (2D, einfache Maße), Assembly (einfache Baugruppen), FEM (Kursstufe), Spreadsheet.
-- Entfernen/abschalten: CAM, BIM/Arch, Robot, OpenSCAD, Mesh-Werkzeuge, Points, Reverse Engineering, Surface (jeweils eigener Commit).
+- Entfernt: BIM, CAM, Robot, OpenSCAD, ReverseEngineering, Inspection, Points, Surface (Schalter in tools/mintcad/options.cmake). Mesh bleibt wegen STL-Export für den 3D-Druck.
 - Vorgehen: erst CMake-Optionen/Konfiguration/Python, C++-Kern nur im Notfall.
 - Design: PAP-Editor-Stil (siehe design/tokens.md).
 
 ## Phasen
 0. Vorbereitung (Repo, Plan, Design-Tokens)                       <- erledigt
-1. Baseline bauen (pixi, macOS arm64) und Build-Anleitung
-2. Umfang reduzieren (ein Modul je Commit, danach Startprüfung)
+1. Baseline bauen (pixi, macOS arm64) und Build-Anleitung        <- erledigt
+2. Umfang reduzieren (ein Modul je Commit)                      <- erledigt: BIM, CAM, Robot, OpenSCAD, ReverseEngineering, Inspection, Points, Surface aus; Mesh bleibt (STL für 3D-Druck)
 3. Workbench "Schule": Skizze -> Körper -> Zeichnung (+ Draft, Assembly, FEM erreichbar)
 4. Oberfläche vereinfachen (Menüs, Einstellungen, Startseite, Deutsch)
 5. Modernes Design (Qt-Stylesheet hell/dunkel, Icons, 3D-Ansicht)
