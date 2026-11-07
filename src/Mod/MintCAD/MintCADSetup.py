@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """MINT-CAD: Einrichtung der Benutzeroberfläche für den Schulbetrieb."""
 
+import os
+import xml.etree.ElementTree as ET
+
 import FreeCAD
 import FreeCADGui as Gui
 
 # Erhöhen, wenn sich die Voreinstellungen ändern: dann werden sie beim nächsten Start einmal neu gesetzt.
-SETUP_VERSION = 2
+SETUP_VERSION = 3
 
 # Reihenfolge der sichtbaren Workbenches (Arbeitsablauf: Konstruieren -> Zeichnung -> ...)
 ENABLED_WORKBENCHES = [
@@ -27,6 +30,41 @@ DISABLED_WORKBENCHES = [
 ]
 
 
+THEME_PACK = "MINT-CAD"
+
+
+def _apply_cfg_group(node, grp):
+    """Überträgt eine FreeCAD-Parameterdatei (XML) rekursiv in eine Parametergruppe."""
+    for child in node:
+        name = child.get("Name")
+        value = child.get("Value")
+        if child.tag == "FCParamGroup":
+            _apply_cfg_group(child, grp.GetGroup(name))
+        elif child.tag == "FCText":
+            grp.SetString(name, child.text or "")
+        elif child.tag == "FCBool":
+            grp.SetBool(name, value == "1")
+        elif child.tag == "FCInt":
+            grp.SetInt(name, int(value))
+        elif child.tag == "FCUInt":
+            grp.SetUnsigned(name, int(value))
+        elif child.tag == "FCFloat":
+            grp.SetFloat(name, float(value))
+
+
+def apply_theme(pack=THEME_PACK):
+    """Wendet das Preference-Pack (Theme) an. Das Stylesheet greift nach einem Neustart."""
+    path = os.path.join(FreeCAD.getResourceDir(), "Gui", "PreferencePacks", pack, pack + ".cfg")
+    if not os.path.isfile(path):
+        FreeCAD.Console.PrintWarning("MINT-CAD: Theme-Datei fehlt: %s\n" % path)
+        return
+    root = ET.parse(path).getroot()  # <FCParameters><FCParamGroup Name="Root">...
+    top = root.find("FCParamGroup")
+    for sub in top:
+        if sub.tag == "FCParamGroup":
+            _apply_cfg_group(sub, FreeCAD.ParamGet("User parameter:" + sub.get("Name")))
+
+
 def apply_defaults():
     """Setzt die Schul-Voreinstellungen einmal je SETUP_VERSION (Nutzer können sie danach ändern)."""
     mint = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/MintCAD")
@@ -46,6 +84,9 @@ def apply_defaults():
     start = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Start")
     start.SetBool("FirstStart2024", False)
     start.SetBool("ShowExamples", True)
+
+    # Design (Theme): Stylesheet wird beim nächsten Start geladen
+    apply_theme()
 
     # Sprache sofort umschalten (sonst erst beim nächsten Start wirksam)
     try:
