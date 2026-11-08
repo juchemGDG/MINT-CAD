@@ -143,9 +143,17 @@ REPLACE_GROUPS = {
 }
 
 
+# Befehle, die in den Standard-Leisten fehlen, im Unterricht aber gebraucht werden (Befehl, Werkzeugleiste)
+ADD_COMMANDS = [
+    ("PartDesign_Plane", "Part Design Helper Features"),  # Bezugsebene
+    ("PartDesign_Line", "Part Design Helper Features"),  # Referenzlinie
+    ("TechDraw_ProjectionGroup", "TechDraw Views"),  # Ansichtsgruppe (Hauptansicht + Projektionen)
+]
+
+
 class _Simplifier:
     def modifyToolBars(self):
-        actions = []
+        actions = [{"append": cmd, "toolBar": tb} for cmd, tb in ADD_COMMANDS]
         for group, singles in REPLACE_GROUPS.items():
             for single in singles:
                 actions.append({"insert": single, "toolItem": group})

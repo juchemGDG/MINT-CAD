@@ -698,23 +698,38 @@ def export_page(name, crop=None, width=1400):
 
 @step(2500)
 def td_ansicht_fertig():
+    """Projektionsgruppe lässt sich per Skript nicht zuverlässig ausrichten: für die Abbildungen
+    werden dieselben Ansichten als Einzelansichten mit Projektionsrichtung (1. Methode) angelegt."""
     doc = App.getDocument("Bauteil_1")
-    doc.recompute()
-    pg = [o for o in doc.Objects if o.TypeId == "TechDraw::DrawProjGroup"][0]
-    STATE["pg"] = pg
-    pg.AutoDistribute = False
-    pg.ScaleType = "Custom"
-    pg.Scale = 1.0
-    anchor = pg.Anchor
-    anchor.Direction = V(0, -1, 0)
-    anchor.RotationVector = V(1, 0, 0)
-    for name in ("Top", "Left"):
+    page, body = STATE["page"], doc.getObject("Body")
+    for name in [o.Name for o in doc.Objects if o.TypeId == "TechDraw::DrawProjGroup"]:
         try:
-            pg.addProjection(name)
+            for item in list(doc.getObject(name).Views):
+                try:
+                    doc.removeObject(item.Name)
+                except Exception:
+                    pass
+            doc.removeObject(name)
         except Exception as exc:
-            log("Projektion %s: %s" % (name, exc))
+            log("Entfernen: %s" % exc)
     doc.recompute()
-    log("Ansichten: %s" % [(v.Type) for v in pg.Views])
+    specs = [("Vorne", V(0, -1, 0), V(1, 0, 0), 70, 140, False), ("Oben", V(0, 0, 1), V(1, 0, 0), 70, 85, True),
+             ("Links", V(-1, 0, 0), V(0, -1, 0), 135, 140, True)]
+    STATE["views"] = {}
+    for name, direction, xdir, x, y, hidden in specs:
+        v = doc.addObject("TechDraw::DrawViewPart", name)
+        page.addView(v)
+        v.Source = [body]
+        v.Direction = direction
+        v.XDirection = xdir
+        v.X, v.Y = x, y
+        v.HardHidden = hidden
+        v.CoarseView = False
+        STATE["views"][name] = v
+    doc.recompute()
+    doc.recompute()
+    STATE["front"] = STATE["views"]["Vorne"]
+    log("Ansichten erzeugt, Vorne: %d Kanten" % len(STATE["front"].getVisibleEdges()))
 
 
 @step(2500)
@@ -725,28 +740,39 @@ def td_ansicht_bild():
 @step(2000)
 def td_bemassung():
     doc = App.getDocument("Bauteil_1")
-    pg = STATE["pg"]
-    front = [v for v in pg.Views if v.Type == "Front"][0]
-    STATE["front"] = front
-    for v in pg.Views:
-        v.HardHidden = True
+    front, page = STATE["front"], STATE["page"]
+    verts = []
+    i = 0
+    while i < 80:
+        try:
+            v = front.getVertexByIndex(i)
+        except Exception:
+            break
+        verts.append((i, v.X, v.Y))
+        i += 1
+    log("Vorne: %d Punkte" % len(verts))
+    ymin = min(v[2] for v in verts)
+    base = [v for v in verts if abs(v[2] - ymin) < 0.1]
+    base.sort(key=lambda v: v[1])
+    xs = [v[1] for v in verts]
+    left = [v for v in verts if abs(v[1] - min(xs)) < 0.1]
+    left.sort(key=lambda v: v[2])
+    log("Unterkante: %s | linke Kante: %s" % (base, left))
+    made = 0
+    if len(base) >= 2:
+        d = doc.addObject("TechDraw::DrawViewDimension", "Bemassung_Breite")
+        d.Type = "DistanceX"
+        d.References2D = [(front, "Vertex%d" % base[0][0]), (front, "Vertex%d" % base[-1][0])]
+        page.addView(d)
+        made += 1
+    if len(left) >= 2:
+        d = doc.addObject("TechDraw::DrawViewDimension", "Bemassung_Hoehe")
+        d.Type = "DistanceY"
+        d.References2D = [(front, "Vertex%d" % left[0][0]), (front, "Vertex%d" % left[-1][0])]
+        page.addView(d)
+        made += 1
     doc.recompute()
-    page = STATE["page"]
-    edges = front.getVisibleEdges()
-    want = {}
-    for i, e in enumerate(edges):
-        b = e.BoundBox
-        if abs(b.YLength) < 1e-6 and abs(b.XLength - 40) < 0.5:
-            want["breite"] = i
-        if abs(b.XLength) < 1e-6 and abs(b.YLength - 35) < 0.5:
-            want["hoehe"] = i
-    log("Kanten: %s von %d" % (want, len(edges)))
-    for name, idx in want.items():
-        dim = doc.addObject("TechDraw::DrawViewDimension", "Bemassung_" + name)
-        dim.Type = "Distance"
-        dim.References2D = [(front, "Edge%d" % idx)]
-        page.addView(dim)
-    doc.recompute()
+    log("Maße: %d" % made)
 
 
 @step(2500)
