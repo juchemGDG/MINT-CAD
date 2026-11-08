@@ -24,7 +24,7 @@ RIBBON = {
         (
             "Modell",
             [
-                ("Körper & Skizze", "Part Design Helper Features"),
+                ("Körper und Skizze", "Part Design Helper Features"),
                 ("Erzeugen", "Part Design Modeling Features"),
                 ("Ändern", "Part Design Dress-Up Features"),
                 ("Anordnen", "Part Design Transformation Features"),
@@ -32,7 +32,7 @@ RIBBON = {
         ),
     ],
     "TechDrawWorkbench": [
-        ("Blatt & Ansichten", [("Blatt", "TechDraw Pages"), ("Ansichten", "TechDraw Views")]),
+        ("Blatt und Ansichten", [("Blatt", "TechDraw Pages"), ("Ansichten", "TechDraw Views")]),
         ("Bemaßen", [("Maße", "TechDraw Dimensions"), ("Mittellinien", "TechDraw Centerlines")]),
         ("Beschriften", [("Beschriftung", "TechDraw Annotation"), ("Schraffur", "TechDraw Decoration")]),
         ("Ausgabe", [("Export", "TechDraw File Access")]),
@@ -48,7 +48,7 @@ RIBBON = {
     "FemWorkbench": [
         ("Modell", [("Analyse", "Model")]),
         ("Randbedingungen", [("Mechanisch", "Mechanical Boundary Conditions and Loads")]),
-        ("Netz & Lösen", [("Netz", "Mesh"), ("Löser", "Solve")]),
+        ("Netz und Lösen", [("Netz", "Mesh"), ("Löser", "Solve")]),
         ("Ergebnisse", [("Ergebnisse", "Results"), ("Hilfen", "Utilities")]),
     ],
 }
@@ -88,6 +88,17 @@ LABELS = {
     "Sketcher_LeaveSketch": "Beenden",
     "Sketcher_ViewSketch": "Ansicht",
     "Sketcher_ViewSection": "Schnitt",
+    "TechDraw_PageDefault": "Standardblatt",
+    "TechDraw_PageTemplate": "Blatt (Vorlage)",
+    "TechDraw_FillTemplateFields": "Felder füllen",
+    "TechDraw_RedrawPage": "Aktualisieren",
+    "TechDraw_PrintAll": "Drucken",
+    "TechDraw_View": "Ansicht",
+    "TechDraw_SectionGroup": "Schnitt",
+    "TechDraw_DetailView": "Detail",
+    "TechDraw_Balloon": "Positionsnr.",
+    "TechDraw_ExportPageSVG": "SVG",
+    "TechDraw_ExportPageDXF": "DXF",
 }
 
 LARGE_ICON = 36
