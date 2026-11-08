@@ -335,6 +335,10 @@ add("FEM_PostFilterDataAlongLine", path("M3 20 H21 M3 20 V4") + path("M5 16 L9 1
 
 def write(out_dir):
     os.makedirs(out_dir, exist_ok=True)
+    # Programmsymbol: auch dort, wo FreeCAD intern das Symbol "freecad" verwendet
+    logo = os.path.join(os.path.dirname(__file__), "..", "..", "src", "Gui", "Icons", "mintcad.svg")
+    with open(logo, encoding="utf-8") as fh:
+        ICONS["freecad"] = fh.read()
     for name, svg in ICONS.items():
         target = os.path.join(out_dir, name + ".svg")
         os.makedirs(os.path.dirname(target), exist_ok=True)
