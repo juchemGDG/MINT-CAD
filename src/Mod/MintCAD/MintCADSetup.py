@@ -8,7 +8,7 @@ import FreeCAD
 import FreeCADGui as Gui
 
 # Erhöhen, wenn sich die Voreinstellungen ändern: dann werden sie beim nächsten Start einmal neu gesetzt.
-SETUP_VERSION = 7
+SETUP_VERSION = 8
 
 # Reihenfolge der sichtbaren Workbenches (Arbeitsablauf: Konstruieren -> Zeichnung -> ...)
 ENABLED_WORKBENCHES = [
@@ -80,6 +80,9 @@ def apply_defaults():
     wbs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Workbenches")
     wbs.SetString("Ordered", ",".join(ENABLED_WORKBENCHES))
     wbs.SetString("Disabled", ",".join(DISABLED_WORKBENCHES))
+
+    general = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/General")
+    general.SetBool("ShowVersionInTitle", False)
 
     # Sprache: Deutsch; Einheiten: mm/kg/s/Grad
     FreeCAD.ParamGet("User parameter:BaseApp/Preferences/General").SetString("Language", "German")

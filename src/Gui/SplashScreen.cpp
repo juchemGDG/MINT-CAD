@@ -403,7 +403,8 @@ QPixmap SplashScreen::splashImage()
         fontExe.setPointSizeF(20.0);
         QFontMetrics metricExe(fontExe);
         int l = QtTools::horizontalAdvance(metricExe, title);
-        if (title == QLatin1String("FreeCAD")) {
+        const bool nameInArtwork = title == QLatin1String("FreeCAD") || title == QLatin1String("MINT-CAD");
+        if (nameInArtwork) {
             l = 0.0;  // "FreeCAD" text is already part of the splashscreen, version goes below it
         }
         int w = splash_image.width();
@@ -430,12 +431,13 @@ QPixmap SplashScreen::splashImage()
         if (color.isValid()) {
             painter.setPen(color);
             painter.setFont(fontExe);
-            if (title != QLatin1String("FreeCAD")) {
+            if (!nameInArtwork) {
                 // FreeCAD's Splashscreen already contains the EXE name, no need to draw it
                 painter.drawText(x, y, title);
             }
             painter.setFont(fontVer);
-            painter.drawText(x + (l + 235), y - 7, version);
+            // MINT-CAD: Position kommt vollständig aus SplashInfoPosition
+            painter.drawText(title == QLatin1String("MINT-CAD") ? x : x + (l + 235), y - 7, version);
             QColor warningColor(QString::fromStdString(wc->second));
             if (suffix == QLatin1String("dev") && warningColor.isValid()) {
                 fontVer.setPointSizeF(14.0);

@@ -55,7 +55,7 @@
 void PrintInitHelp();
 
 const auto sBanner = fmt::format(
-    "(C) 2001-{} FreeCAD contributors\n"
+    "MINT-CAD basiert auf FreeCAD. (C) 2001-{} FreeCAD contributors\n"
     "FreeCAD is free and open-source software licensed under the terms of LGPL2+ license.\n\n",
     FCCopyrightYear
 );
@@ -188,26 +188,24 @@ int main(int argc, char** argv)
 #endif
 
     // Name and Version of the Application
-    App::Application::Config()["ExeName"] = "FreeCAD";
-    App::Application::Config()["ExeVendor"] = "FreeCAD";
+    App::Application::Config()["ExeName"] = "MINT-CAD";
+    App::Application::Config()["ExeVendor"] = "MINT-CAD";
     App::Application::Config()["AppDataSkipVendor"] = "true";
     App::Application::Config()["MaintainerUrl"] = "https://freecad.org";
 
     // set the banner (for logging and console)
     App::Application::Config()["CopyrightInfo"] = sBanner;
-    App::Application::Config()["AppIcon"] = "freecad";
-    App::Application::Config()["SplashScreen"] = "freecadsplash";
-    App::Application::Config()["AboutImage"] = App::Application::isDevelopmentVersion()
-        ? "freecadaboutdev"
-        : "freecadabout";
+    App::Application::Config()["AppIcon"] = "mintcad";
+    App::Application::Config()["SplashScreen"] = "mintcadsplash";
+    App::Application::Config()["AboutImage"] = "mintcadabout";
     App::Application::Config()["StartWorkbench"] = "PartDesignWorkbench";
     // App::Application::Config()["HiddenDockWindow"] = "Property editor";
     App::Application::Config()["SplashAlignment"] = "Bottom|Left";
     App::Application::Config()["SplashTextColor"] = "#418FDE";
     App::Application::Config()["SplashWarningColor"] = "#CA333B";
-    App::Application::Config()["SplashInfoColor"] = "#000000";
-    App::Application::Config()["SplashInfoPosition"] = "6,75";
-    App::Application::Config()["DesktopFileName"] = "org.freecad.FreeCAD";
+    App::Application::Config()["SplashInfoColor"] = "#94a3b8";
+    App::Application::Config()["SplashInfoPosition"] = "174,200";
+    App::Application::Config()["DesktopFileName"] = "de.mint-checker.MINT-CAD";
 
     try {
         // Init phase ===========================================================

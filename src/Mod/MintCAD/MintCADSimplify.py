@@ -32,6 +32,7 @@ HIDE_MENUS = [
 HIDE_COMMANDS = [
     # Hilfe-Menü: Verweise auf Spenden, Entwickler- und Python-Handbuch
     "Std_FreeCADDonation",
+    "Std_FreeCADWebsite",
     "Std_DevHandbook",
     "Std_PythonHelp",
     "Std_FreeCADForum",

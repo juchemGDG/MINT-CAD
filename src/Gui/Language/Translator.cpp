@@ -27,6 +27,7 @@
 #include <QRegularExpression>
 #include <QStringList>
 #include <QTranslator>
+#include <cstring>
 #include <QWidget>
 
 
@@ -113,6 +114,32 @@ public:
     QStringList paths;
 };
 }  // namespace Gui
+
+namespace
+{
+/// MINT-CAD: zeigt in übersetzten Texten den Programmnamen statt "FreeCAD".
+/// Der Info-Dialog bleibt unverändert, damit die Hinweise auf FreeCAD und seine Autoren erhalten bleiben.
+class BrandedTranslator: public QTranslator
+{
+public:
+    using QTranslator::QTranslator;
+
+    QString translate(
+        const char* context,
+        const char* sourceText,
+        const char* disambiguation = nullptr,
+        int n = -1
+    ) const override
+    {
+        QString text = QTranslator::translate(context, sourceText, disambiguation, n);
+        if (context && strstr(context, "AboutDialog")) {
+            return text;
+        }
+        text.replace(QLatin1String("FreeCAD"), QLatin1String("MINT-CAD"));
+        return text;
+    }
+};
+}  // namespace
 
 class Translator::ParameterObserver: public ParameterGrp::ObserverType
 {
@@ -382,7 +409,7 @@ void Translator::installQMFiles(const QDir& dir, const char* locale)
 
         // okay, we need to install this file
         if (!ok) {
-            auto translator = new QTranslator;
+            auto translator = new BrandedTranslator;
             translator->setObjectName(it);
             if (translator->load(dir.filePath(it))) {
                 qApp->installTranslator(translator);
