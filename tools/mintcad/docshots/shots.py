@@ -55,18 +55,24 @@ def mw():
     return Gui.getMainWindow()
 
 
+def _largest(widgets):
+    best, area = None, 0
+    for w in widgets:
+        if not w.isVisible() or w.visibleRegion().isEmpty():
+            continue
+        r = w.visibleRegion().boundingRect()
+        if r.width() * r.height() > area:
+            best, area = w, r.width() * r.height()
+    return best
+
+
 def gl_widget():
-    for g in mw().findChildren(QtOpenGLWidgets.QOpenGLWidget):
-        if g.isVisible() and g.width() > 200:
-            return g
-    return None
+    """Das OpenGL-Widget der gerade aktiven 3D-Ansicht (verdeckte Reiter haben eine leere sichtbare Fläche)."""
+    return _largest([g for g in mw().findChildren(QtOpenGLWidgets.QOpenGLWidget) if g.width() > 200])
 
 
 def graphics_view():
-    for v in mw().findChildren(QtWidgets.QGraphicsView):
-        if v.isVisible() and v.width() > 300:
-            return v
-    return None
+    return _largest([v for v in mw().findChildren(QtWidgets.QGraphicsView) if v.width() > 300])
 
 
 def read_gl(g):
@@ -614,6 +620,14 @@ def origin_axis(body, role):
     return [f for f in body.Origin.OriginFeatures if f.Role == role][0]
 
 
+@step(1500)
+def polar_vier():
+    pp = STATE["body"].Tip
+    pp.Occurrences = 4  # der Dialog übernimmt beim Bestätigen seinen eigenen Standardwert
+    STATE["doc"].recompute()
+    iso()
+
+
 @step(1800)
 def polar_ergebnis():
     shot("pd_23_polar_ergebnis", "gl", width=800)
@@ -664,7 +678,7 @@ def td_ansicht_dialog():
 
 @step(2500)
 def td_ansicht_shot():
-    shot("td_03_ansichten_dialog", "alles", width=1100)
+    shot("td_03_ansichten_dialog", "panel", width=520)
     # Standardwerte aus der Anleitung: Skalieren benutzerdefiniert 1:1, Auto-Verteilung aus
     for b in mw().findChildren(QtWidgets.QCheckBox):
         if b.isVisible() and "Automatische" in b.text():
