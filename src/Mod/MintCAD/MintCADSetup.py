@@ -32,7 +32,7 @@ DISABLED_WORKBENCHES = [
 
 THEME_PACK = "MINT-CAD"
 # Erhöhen, wenn sich das Theme ändert: wird dann einmal neu angewendet (ohne andere Einstellungen anzufassen).
-THEME_VERSION = 2
+THEME_VERSION = 3
 
 
 def _apply_cfg_group(node, grp):

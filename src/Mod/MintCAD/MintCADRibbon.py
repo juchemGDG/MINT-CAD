@@ -61,7 +61,6 @@ SKETCH_TAB = (
         ("Zeichnen", "Geometries"),
         ("Randbedingungen", "Constraints"),
         ("Werkzeuge", "Sketcher Tools"),
-        ("B-Spline", "B-Spline Tools"),
         ("Hilfen", "Visual Helpers"),
     ],
 )
@@ -105,6 +104,7 @@ LARGE_ICON = 36
 SMALL_ICON = 28
 LARGE_MAX_BUTTONS = 7  # Gruppen mit mehr Schaltflächen werden kompakt (nur Icons) dargestellt
 BUTTON_WIDTH = 84
+RIBBON_HEIGHT = 128
 
 STYLE = """
 #MintRibbon { background: #0f172a; }
@@ -129,6 +129,26 @@ def _find_toolbar(name):
         if tb.objectName() == name:
             return tb
     return None
+
+
+def _command_icon(action, size):
+    """Icon in ausreichender Größe: bevorzugt das Befehls-Icon, sonst das der QAction (ggf. skaliert)."""
+    name = str(action.data() or "")
+    icon = None
+    if name:
+        try:
+            pix = Gui.Command.get(name).getInfo().get("pixmap", "")
+            if pix:
+                icon = Gui.getIcon(pix)
+        except Exception:
+            icon = None
+    if icon is None or icon.isNull():
+        icon = action.icon()
+    pm = icon.pixmap(QtCore.QSize(size, size))
+    if not pm.isNull() and pm.width() < size * pm.devicePixelRatio() * 0.9:
+        pm = pm.scaled(size * 2, size * 2, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        pm.setDevicePixelRatio(2.0)
+    return QtGui.QIcon(pm)
 
 
 class _ProxyButton(QtWidgets.QToolButton):
@@ -159,7 +179,7 @@ class _ProxyButton(QtWidgets.QToolButton):
 
     def _sync(self):
         a = self._action
-        self.setIcon(a.icon())
+        self.setIcon(_command_icon(a, LARGE_ICON if self._large else SMALL_ICON))
         self.setEnabled(a.isEnabled())
         self.setToolTip(a.toolTip() or a.text())
         self.setStatusTip(a.statusTip())
@@ -178,19 +198,27 @@ class _Group(QtWidgets.QWidget):
         lay = QtWidgets.QVBoxLayout(self)
         lay.setContentsMargins(6, 2, 6, 2)
         lay.setSpacing(0)
-        row = QtWidgets.QHBoxLayout()
-        row.setSpacing(2)
-        actions = [a for a in toolbar.actions() if not a.isSeparator() and a.isVisible()]
-        large = len(actions) <= LARGE_MAX_BUTTONS
-        self.count = 0
-        for a in actions:
+        items = []
+        for a in toolbar.actions():
+            if a.isSeparator() or not a.isVisible():
+                continue
             w = toolbar.widgetForAction(a)
             if w is not None and not isinstance(w, QtWidgets.QToolButton):
                 continue  # z. B. Arbeitsbereichs-Auswahl
-            row.addWidget(_ProxyButton(a, w, large, self))
-            self.count += 1
-        row.addStretch(0)
-        lay.addLayout(row)
+            items.append((a, w))
+        labels = [LABELS.get(str(a.data()), a.text()).replace("&", "") for a, _ in items]
+        large = 0 < len(items) <= LARGE_MAX_BUTTONS and all(len(t) <= 16 for t in labels)
+        self.count = len(items)
+        grid = QtWidgets.QGridLayout()
+        grid.setSpacing(2)
+        grid.setContentsMargins(0, 0, 0, 0)
+        rows = 1 if (large or len(items) <= 8) else 2
+        cols = (len(items) + rows - 1) // rows
+        for i, (a, w) in enumerate(items):
+            btn = _ProxyButton(a, w, large, self)
+            grid.addWidget(btn, i // cols if rows > 1 else 0, i % cols if rows > 1 else i)
+        lay.addLayout(grid)
+        lay.addStretch(1)
         label = QtWidgets.QLabel(caption)
         label.setAlignment(QtCore.Qt.AlignHCenter)
         lay.addWidget(label)
@@ -219,7 +247,17 @@ class Ribbon(QtWidgets.QToolBar):
         v.addWidget(self.tabbar)
         self.stack = QtWidgets.QStackedWidget()
         self.stack.setObjectName("MintRibbonPage")
-        v.addWidget(self.stack)
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidget(self.stack)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll.setFixedHeight(RIBBON_HEIGHT)
+        scroll.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        scroll.setStyleSheet("QScrollArea { background: transparent; } QScrollBar:horizontal { height: 8px; }")
+        v.addWidget(scroll)
+        host.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.addWidget(host)
 
     # -- Aufbau ----------------------------------------------------------------------------
