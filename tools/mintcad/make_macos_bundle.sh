@@ -69,8 +69,9 @@ for base, _, names in os.walk(res):
 PY
 
 echo "== Startprogramm und Info.plist"
-# SDKROOT wird hier bewusst nicht gesetzt: das normale SDK enthält die C++-Header, SDK 14.5 allein nicht
-env -u SDKROOT /usr/bin/clang++ -std=c++17 -mmacosx-version-min=11.0 -o "$APP/Contents/MacOS/MINT-CAD" "$LAUNCHER"
+# Das System-clang findet mit dem neuen SDK die C++-Header nicht; der Compiler der Entwicklungsumgebung schon
+"$ENVDIR/bin/arm64-apple-darwin20.0.0-clang++" -std=c++17 -isysroot "$SDKROOT" -mmacosx-version-min=11.0 \
+    -o "$APP/Contents/MacOS/MINT-CAD" "$LAUNCHER"
 sed -e 's/APPLICATION_MENU_NAME/MINT-CAD/' -e "s/FREECAD_VERSION/$VERSION/" \
     -e 's/<string>FreeCAD<\/string>/<string>MINT-CAD<\/string>/' \
     -e 's/freecad\.icns/mintcad.icns/' -e 's/org\.freecad\.FreeCAD/de.mint-checker.MINT-CAD/' \
