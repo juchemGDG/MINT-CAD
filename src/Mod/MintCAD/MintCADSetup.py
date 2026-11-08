@@ -155,3 +155,12 @@ def apply_layout():
         mw.tabifyDockWidget(model, tasks)
         model.raise_()
     mw.resizeDocks([model], [300], QtCore.Qt.Horizontal)
+
+
+def register_fonts():
+    """Normschrift osifont (liegt bei den Beispielen) für Zeichnungen und Schriftfelder bereitstellen."""
+    from PySide6 import QtGui
+
+    ttf = os.path.join(FreeCAD.getResourceDir(), "examples", "osifont-lgpl3fe.ttf")
+    if os.path.isfile(ttf):
+        QtGui.QFontDatabase.addApplicationFont(ttf)

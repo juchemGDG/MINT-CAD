@@ -62,7 +62,15 @@ def gl_widget():
     return None
 
 
+def graphics_view():
+    for v in mw().findChildren(QtWidgets.QGraphicsView):
+        if v.isVisible() and v.width() > 300:
+            return v
+    return None
+
+
 def read_gl(g):
+    """3D-Bild direkt aus dem OpenGL-Puffer (grabFramebuffer liefert hier nur den Hintergrund)."""
     r = g.devicePixelRatio()
     w, h = int(g.width() * r), int(g.height() * r)
     g.makeCurrent()
@@ -93,12 +101,7 @@ def region(name):
     if name == "panel+gl":
         return QtCore.QRect(0, rb, W, H - rb - 30)
     if name == "panel":
-        dock = [d for d in win.findChildren(QtWidgets.QDockWidget) if d.isVisible()]
-        r = QtCore.QRect()
-        for d in dock:
-            if rect_in_window(d).left() < 50:
-                r = r.united(rect_in_window(d))
-        return r
+        return QtCore.QRect(0, rb, 330, H - rb - 30)
     if name == "status":
         sb = win.statusBar()
         r = rect_in_window(sb)
@@ -106,17 +109,39 @@ def region(name):
     raise KeyError(name)
 
 
-def shot(name, where="alles", width=1100, gl_only=False):
+def is_3d():
+    v = Gui.activeView()
+    return v is not None and hasattr(v, "viewIsometric")
+
+
+def shot(name, where="alles", width=1100):
     win = mw()
     QtWidgets.QApplication.processEvents()
+    g = gl_widget()
+    gl = None
+    gpos = None
+    if where in ("alles", "gl", "panel+gl"):
+        if is_3d() and g is not None:
+            # Coin-Ansicht: direkt aus dem OpenGL-Puffer lesen
+            gl, gpos = read_gl(g), rect_in_window(g).topLeft()
+        else:
+            gv = graphics_view()
+            if gv is not None:
+                vp = gv.viewport()
+                r0 = win.devicePixelRatio()
+                gl = QtGui.QImage(int(vp.width() * r0), int(vp.height() * r0), QtGui.QImage.Format_RGBA8888)
+                gl.setDevicePixelRatio(r0)
+                gl.fill(QtGui.QColor("#f8fafc"))
+                pp = QtGui.QPainter(gl)
+                gv.render(pp)
+                pp.end()
+                gpos = rect_in_window(vp).topLeft()
     img = win.grab().toImage()
     dpr = img.devicePixelRatio() if img.devicePixelRatio() > 1 else img.width() / win.width()
-    g = gl_widget()
-    if g is not None:
-        gl = read_gl(g)
+    if gl is not None:
         p = QtGui.QPainter(img)
-        pos = rect_in_window(g).topLeft()
-        p.drawImage(QtCore.QPoint(int(pos.x() * dpr), int(pos.y() * dpr)), gl)
+        gl.setDevicePixelRatio(img.devicePixelRatio())
+        p.drawImage(gpos, gl)  # Painter arbeitet in logischen Koordinaten
         p.end()
     r = region(where)
     crop = img.copy(int(r.x() * dpr), int(r.y() * dpr), int(r.width() * dpr), int(r.height() * dpr))
@@ -231,8 +256,6 @@ P1 = [(0, 0), (40, 0), (40, 10), (25, 50), (15, 50), (15, 35), (0, 35)]
 @step(2500)
 def start():
     win = mw()
-    win.showNormal()
-    win.resize(1500, 940)
     Gui.activateWorkbench("PartDesignWorkbench")
     STATE["doc"], STATE["body"] = new_body("Bauteil_1")
 
@@ -320,12 +343,11 @@ def s_pad_dialog():
 @step(2000)
 def s_pad_shot():
     shot("pd_08_pad_dialog", "panel+gl")
-    close_dialog()
-    body, sk = STATE["body"], STATE["sk1"]
-    pad = body.newObject("PartDesign::Pad", "Pad")
-    pad.Profile = sk
+    pad = STATE["body"].Tip
+    pad.Label = "Grundkörper"
     pad.Length = 30
-    sk.Visibility = False
+    click_button("OK")
+    STATE["sk1"].Visibility = False
     STATE["doc"].recompute()
     STATE["pad"] = pad
     iso()
@@ -377,12 +399,11 @@ def s_tasche_dialog():
 @step(2000)
 def s_tasche_shot():
     shot("pd_11_tasche_dialog", "panel+gl")
-    close_dialog()
-    body, sk = STATE["body"], STATE["sk2"]
-    pocket = body.newObject("PartDesign::Pocket", "Tasche")
-    pocket.Profile = sk
+    pocket = STATE["body"].Tip
+    pocket.Label = "Stufe"
     pocket.Length = 15
-    sk.Visibility = False
+    click_button("OK")
+    STATE["sk2"].Visibility = False
     STATE["doc"].recompute()
     STATE["pocket"] = pocket
     iso()
@@ -428,14 +449,13 @@ def s_bohrung_dialog():
 @step(2200)
 def s_bohrung_shot():
     shot("pd_14_bohrung_dialog", "panel+gl")
-    close_dialog()
-    body, sk = STATE["body"], STATE["sk3"]
-    hole = body.newObject("PartDesign::Hole", "Bohrung")
-    hole.Profile = sk
+    hole = STATE["body"].Tip
+    hole.Label = "Bohrung"
     hole.Threaded = False
     hole.Diameter = 15
     hole.DepthType = "ThroughAll"
-    sk.Visibility = False
+    click_button("OK")
+    STATE["sk3"].Visibility = False
     STATE["doc"].recompute()
     log("Bohrung gültig: %s" % hole.Shape.isValid())
     STATE["hole"] = hole
@@ -492,13 +512,11 @@ def teil2_dialog():
 @step(2200)
 def teil2_dialog_shot():
     shot("pd_18_rotation_dialog", "panel+gl")
-    close_dialog()
-    body, sk = STATE["body"], STATE["sk4"]
-    rev = body.newObject("PartDesign::Revolution", "Drehen")
-    rev.Profile = sk
-    rev.ReferenceAxis = (sk, ["V_Axis"])
+    rev = STATE["body"].Tip
+    rev.ReferenceAxis = (STATE["sk4"], ["V_Axis"])
     rev.Angle = 180
-    sk.Visibility = False
+    click_button("OK")
+    STATE["sk4"].Visibility = False
     STATE["doc"].recompute()
     STATE["rev"] = rev
     iso()
@@ -516,7 +534,7 @@ def fase_dialog():
     for i, e in enumerate(rev.Shape.Edges):
         if abs(e.BoundBox.ZMin - 20) < 1e-6 and abs(e.BoundBox.ZMax - 20) < 1e-6 and e.BoundBox.XMax > 9.9:
             Gui.Selection.clearSelection()
-            Gui.Selection.addSelection(STATE["doc"].Name, "Body", "Drehen.Edge%d" % (i + 1))
+            Gui.Selection.addSelection(STATE["doc"].Name, "Body", "Revolution.Edge%d" % (i + 1))
             break
     Gui.runCommand("PartDesign_Chamfer", 0)
     iso()
@@ -584,14 +602,10 @@ def polar_dialog():
 @step(2200)
 def polar_shot():
     shot("pd_22_polar_dialog", "panel+gl")
-    close_dialog()
-    body = STATE["body"]
-    pp = body.newObject("PartDesign::PolarPattern", "Kreismuster")
-    pp.Originals = [STATE["loch"]]
-    pp.Axis = (origin_axis(body, "Z_Axis"), [""])
+    pp = STATE["body"].Tip
     pp.Angle = 360
     pp.Occurrences = 4
-    body.Tip = pp
+    click_button("OK")
     STATE["doc"].recompute()
     iso()
 
@@ -627,12 +641,17 @@ def td_seite():
     Gui.runCommand("TechDraw_PageDefault", 0)
 
 
-@step(2500)
-def td_seite_shot():
-    shot("td_02_seite_leer", "alles", width=1100)
+@step(1500)
+def td_seite_zeigen():
     page = [o for o in App.getDocument("Bauteil_1").Objects if o.TypeId == "TechDraw::DrawPage"]
     STATE["page"] = page[0] if page else None
     log("Seite: %s" % (page[0].Name if page else "keine"))
+    page[0].ViewObject.doubleClicked()  # Zeichenblatt als aktive Ansicht öffnen
+
+
+@step(2500)
+def td_seite_shot():
+    shot("td_02_seite_leer", "alles", width=1100)
 
 
 @step(1500)
@@ -640,17 +659,111 @@ def td_ansicht_dialog():
     doc = App.getDocument("Bauteil_1")
     Gui.Selection.clearSelection()
     Gui.Selection.addSelection(doc.Name, "Body")
-    Gui.runCommand("TechDraw_ProjGroup", 0)
+    Gui.runCommand("TechDraw_ProjectionGroup", 0)
 
 
 @step(2500)
 def td_ansicht_shot():
     shot("td_03_ansichten_dialog", "alles", width=1100)
+    # Standardwerte aus der Anleitung: Skalieren benutzerdefiniert 1:1, Auto-Verteilung aus
+    for b in mw().findChildren(QtWidgets.QCheckBox):
+        if b.isVisible() and "Automatische" in b.text():
+            b.setChecked(False)
     click_button("OK")
+
+
+def export_page(name, crop=None, width=1400):
+    """Zeichenblatt über TechDraw als SVG ausgeben und als Bild speichern (zeigt das echte Ergebnis)."""
+    import TechDrawGui
+    from PySide6.QtSvg import QSvgRenderer
+
+    svg = os.path.join(OUT, name + ".svg")
+    TechDrawGui.exportPageAsSvg(STATE["page"], svg)
+    r = QSvgRenderer(svg)
+    size = r.defaultSize()
+    h = int(width * size.height() / size.width())
+    img = QtGui.QImage(width, h, QtGui.QImage.Format_ARGB32)
+    img.fill(QtGui.QColor("white"))
+    p = QtGui.QPainter(img)
+    p.setRenderHint(QtGui.QPainter.Antialiasing)
+    r.render(p)
+    p.end()
+    if crop:
+        x, y, w, hh = crop
+        img = img.copy(int(x * width), int(y * h), int(w * width), int(hh * h))
+    img.save(os.path.join(OUT, name + ".png"))
+    os.remove(svg)
+    log("Zeichnung %s %dx%d" % (name, img.width(), img.height()))
 
 
 @step(2500)
 def td_ansicht_fertig():
-    shot("td_04_ansichten_angeordnet", "alles", width=1100)
-    for o in App.getDocument("Bauteil_1").Objects:
-        log("Objekt: %s %s" % (o.Name, o.TypeId))
+    doc = App.getDocument("Bauteil_1")
+    doc.recompute()
+    pg = [o for o in doc.Objects if o.TypeId == "TechDraw::DrawProjGroup"][0]
+    STATE["pg"] = pg
+    pg.AutoDistribute = False
+    pg.ScaleType = "Custom"
+    pg.Scale = 1.0
+    anchor = pg.Anchor
+    anchor.Direction = V(0, -1, 0)
+    anchor.RotationVector = V(1, 0, 0)
+    for name in ("Top", "Left"):
+        try:
+            pg.addProjection(name)
+        except Exception as exc:
+            log("Projektion %s: %s" % (name, exc))
+    doc.recompute()
+    log("Ansichten: %s" % [(v.Type) for v in pg.Views])
+
+
+@step(2500)
+def td_ansicht_bild():
+    export_page("td_04_ansichten_angeordnet")
+
+
+@step(2000)
+def td_bemassung():
+    doc = App.getDocument("Bauteil_1")
+    pg = STATE["pg"]
+    front = [v for v in pg.Views if v.Type == "Front"][0]
+    STATE["front"] = front
+    for v in pg.Views:
+        v.HardHidden = True
+    doc.recompute()
+    page = STATE["page"]
+    edges = front.getVisibleEdges()
+    want = {}
+    for i, e in enumerate(edges):
+        b = e.BoundBox
+        if abs(b.YLength) < 1e-6 and abs(b.XLength - 40) < 0.5:
+            want["breite"] = i
+        if abs(b.XLength) < 1e-6 and abs(b.YLength - 35) < 0.5:
+            want["hoehe"] = i
+    log("Kanten: %s von %d" % (want, len(edges)))
+    for name, idx in want.items():
+        dim = doc.addObject("TechDraw::DrawViewDimension", "Bemassung_" + name)
+        dim.Type = "Distance"
+        dim.References2D = [(front, "Edge%d" % idx)]
+        page.addView(dim)
+    doc.recompute()
+
+
+@step(2500)
+def td_bemassung_bild():
+    export_page("td_05_bemassung")
+    page = STATE["page"]
+    page.Template.setEditFieldContent("title", "Winkelstück")
+    page.Template.setEditFieldContent("creator", "Name Vorname")
+    page.Template.setEditFieldContent("class", "10a")
+    page.Template.setEditFieldContent("date_of_issue", "08.11.2026")
+    App.getDocument("Bauteil_1").recompute()
+
+
+@step(2500)
+def td_felder_bild():
+    export_page("td_06_schriftfeld", crop=(0.33, 0.78, 0.67, 0.22), width=2000)
+    shot("td_01_band_zeichnung", "band")
+
+
+QtCore.QTimer.singleShot(7000, run)

@@ -4,6 +4,7 @@
 import MintCADSetup
 
 MintCADSetup.apply_defaults()
+MintCADSetup.register_fonts()
 
 import MintCADSimplify
 
