@@ -223,6 +223,9 @@ def main():
     done = 0
     for f in files:
         name = os.path.basename(f)
+        # Mauszeiger liegen auf der hellen 3D-Ansicht und werden von FreeCAD selbst eingefärbt: nicht umwandeln
+        if "Pointer" in name or "Crosshair" in name:
+            continue
         # Pfad relativ zum Icon-Wurzelordner (Icons wie "actions/TechDraw_View" liegen in Unterordnern)
         rel = name
         for d in SRC_DIRS:

@@ -124,9 +124,16 @@ void ToolHandler::setSvgCursor(
     //
     qreal pRatio = devicePixelRatio();
     bool isRatioOne = (pRatio == 1.0);
-    qreal cursorSize = isRatioOne ? 64 : 32;
-    qreal hotX = x;
-    qreal hotY = y;
+    // MINT-CAD: Cursorgröße einstellbar (View/CursorSize, Standard wie bisher 32)
+    const int baseSize = static_cast<int>(
+        App::GetApplication()
+            .GetParameterGroupByPath("User parameter:BaseApp/Preferences/View")
+            ->GetInt("CursorSize", 32)
+    );
+    const qreal cursorScale = baseSize / 32.0;
+    qreal cursorSize = isRatioOne ? 2.0 * baseSize : baseSize;
+    qreal hotX = x * cursorScale;
+    qreal hotY = y * cursorScale;
 #if !defined(Q_OS_WIN32) && !defined(Q_OS_MACOS)
     if (qGuiApp->platformName() == QLatin1String("xcb")) {
         hotX *= pRatio;
@@ -140,7 +147,7 @@ void ToolHandler::setSvgCursor(
         colorMapping
     );
     if (isRatioOne) {
-        pointer = pointer.scaled(32, 32);
+        pointer = pointer.scaled(baseSize, baseSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
     setCursor(pointer, hotX, hotY, false);
 }
