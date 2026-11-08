@@ -8,7 +8,7 @@ import FreeCAD
 import FreeCADGui as Gui
 
 # Erhöhen, wenn sich die Voreinstellungen ändern: dann werden sie beim nächsten Start einmal neu gesetzt.
-SETUP_VERSION = 5
+SETUP_VERSION = 6
 
 # Reihenfolge der sichtbaren Workbenches (Arbeitsablauf: Konstruieren -> Zeichnung -> ...)
 ENABLED_WORKBENCHES = [
@@ -95,6 +95,15 @@ def apply_defaults():
     files = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/TechDraw/Files")
     files.SetString("TemplateDir", tpl_dir)
     files.SetString("TemplateFile", os.path.join(tpl_dir, "MINTCAD_A4_Querformat.svg"))
+
+    # Punktfang: Sketcher fängt an Objekten; Draft mit Endpunkt, Mitte, Zentrum, Schnittpunkt u. a.
+    FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Sketcher/Snap").SetBool("SnapToObjects", True)
+    draft = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Draft")
+    snap_order = ["Lock", "Near", "Extension", "Parallel", "Grid", "Endpoint", "Midpoint", "Perpendicular",
+                  "Angle", "Center", "Ortho", "Intersection", "Special", "Dimensions", "WorkingPlane"]
+    snap_on = {"Lock", "Grid", "Endpoint", "Midpoint", "Perpendicular", "Center", "Ortho", "Intersection", "Dimensions"}
+    draft.SetString("snapModes", "".join("1" if n in snap_on else "0" for n in snap_order))
+    draft.SetBool("alwaysSnap", True)
 
     # Layout: linkes Panel (Modell/Aufgaben) beim nächsten Start auf eine schmale Breite setzen
     mint.SetBool("ApplyLayout", True)
