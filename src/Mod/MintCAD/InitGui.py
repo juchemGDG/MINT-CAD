@@ -12,3 +12,9 @@ MintCADSimplify.install()
 import MintCADHelp
 
 MintCADHelp.register()
+
+import MintCADRibbon
+from PySide6 import QtCore as _QtCore
+
+if FreeCAD.ParamGet("User parameter:BaseApp/Preferences/MintCAD").GetBool("Ribbon", True):
+    _QtCore.QTimer.singleShot(500, MintCADRibbon.install)

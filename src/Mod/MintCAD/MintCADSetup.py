@@ -8,7 +8,7 @@ import FreeCAD
 import FreeCADGui as Gui
 
 # Erhöhen, wenn sich die Voreinstellungen ändern: dann werden sie beim nächsten Start einmal neu gesetzt.
-SETUP_VERSION = 4
+SETUP_VERSION = 5
 
 # Reihenfolge der sichtbaren Workbenches (Arbeitsablauf: Konstruieren -> Zeichnung -> ...)
 ENABLED_WORKBENCHES = [
@@ -96,6 +96,9 @@ def apply_defaults():
     files.SetString("TemplateDir", tpl_dir)
     files.SetString("TemplateFile", os.path.join(tpl_dir, "MINTCAD_A4_Querformat.svg"))
 
+    # Layout: linkes Panel (Modell/Aufgaben) beim nächsten Start auf eine schmale Breite setzen
+    mint.SetBool("ApplyLayout", True)
+
     # Design (Theme): Stylesheet wird beim nächsten Start geladen
     apply_theme()
     mint.SetInt("ThemeVersion", THEME_VERSION)
@@ -107,3 +110,29 @@ def apply_defaults():
         FreeCAD.Console.PrintWarning("MINT-CAD: Sprache konnte nicht umgestellt werden: %s\n" % exc)
 
     mint.SetInt("SetupVersion", SETUP_VERSION)
+
+
+def apply_layout():
+    """Setzt einmalig das Layout: Aufgaben und Modell als Reiter im linken Panel, ca. 300 px breit."""
+    mint = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/MintCAD")
+    if not mint.GetBool("ApplyLayout", False):
+        return
+    mint.SetBool("ApplyLayout", False)
+    from PySide6 import QtCore, QtWidgets
+
+    mw = Gui.getMainWindow()
+    model = tasks = None
+    for dock in mw.findChildren(QtWidgets.QDockWidget):
+        name = dock.widget().objectName() if dock.widget() else dock.objectName()
+        if name == "Model":
+            model = dock
+        elif name == "Tasks":
+            tasks = dock
+    if model is None:
+        return
+    if tasks is not None and not tasks.isFloating():
+        mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, model)
+        mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, tasks)
+        mw.tabifyDockWidget(model, tasks)
+        model.raise_()
+    mw.resizeDocks([model], [300], QtCore.Qt.Horizontal)
