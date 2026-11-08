@@ -77,7 +77,8 @@ void ViewProviderPlane::attach(App::DocumentObject* obj)
     // and faceSeparator...
     // ShapeAppearance.setTransparency(0.8);
     auto material = new SoMaterial();
-    material->transparency.setValue(0.85f);
+    // MINT-CAD: dezent transparentes Blau statt Rot/Grün/Blau je Ebene
+    material->transparency.setValue(0.6f);
 
     if (!role.empty()) {
         ShapeAppearance.setDiffuseColor(getColor(role));
@@ -226,15 +227,11 @@ void ViewProviderPlane::updatePlaneSize()
 
 unsigned long ViewProviderPlane::getColor(const std::string& role) const
 {
+    // MINT-CAD: alle drei Ursprungsebenen im selben leichten Blau (#93c5fd); unterschieden werden sie
+    // über Beschriftung und Position, die Achsen behalten ihre Farben.
     auto planesRoles = App::LocalCoordinateSystem::PlaneRoles;
-    if (role == planesRoles[0]) {
-        return ViewParams::instance()->getAxisZColor();  // XY-plane
-    }
-    else if (role == planesRoles[1]) {
-        return ViewParams::instance()->getAxisYColor();  // XZ-plane
-    }
-    else if (role == planesRoles[2]) {
-        return ViewParams::instance()->getAxisXColor();  // YZ-plane
+    if (role == planesRoles[0] || role == planesRoles[1] || role == planesRoles[2]) {
+        return 0x93C5FDFF;
     }
     return 0;
 }
