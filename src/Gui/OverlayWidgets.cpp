@@ -808,7 +808,7 @@ void OverlayTabWidget::restore(ParameterGrp::handle handle)
     }
 
     std::string widgets
-        = handle->GetASCII("Widgets", getDockArea() == Qt::RightDockWidgetArea ? "Tasks," : "");
+        = handle->GetASCII("Widgets", "");
 
     for (auto& name : QString::fromUtf8(widgets.c_str()).split(QLatin1Char(','))) {
         if (name.isEmpty()) {
