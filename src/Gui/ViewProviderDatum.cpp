@@ -101,11 +101,7 @@ void ViewProviderDatum::attach(App::DocumentObject* pcObject)
     }
     highlight->objectName = getObject()->getNameInDocument();
     highlight->documentName = getObject()->getDocument()->getName();
-    // MINT-CAD: Ursprungsebenen nur über die Emissionsfarbe hervorheben, damit sie transparent bleiben
-    // (EMISSIVE_DIFFUSE überschreibt die Diffusfarbe und damit die Transparenz).
-    highlight->style = getObject()->isDerivedFrom(App::Plane::getClassTypeId())
-        ? SoFCSelection::EMISSIVE
-        : SoFCSelection::EMISSIVE_DIFFUSE;
+    highlight->style = SoFCSelection::EMISSIVE_DIFFUSE;
 
     // Visible features
     auto visible = new SoSeparator();

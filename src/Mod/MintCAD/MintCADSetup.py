@@ -8,7 +8,7 @@ import FreeCAD
 import FreeCADGui as Gui
 
 # Erhöhen, wenn sich die Voreinstellungen ändern: dann werden sie beim nächsten Start einmal neu gesetzt.
-SETUP_VERSION = 6
+SETUP_VERSION = 7
 
 # Reihenfolge der sichtbaren Workbenches (Arbeitsablauf: Konstruieren -> Zeichnung -> ...)
 ENABLED_WORKBENCHES = [
@@ -104,6 +104,13 @@ def apply_defaults():
     snap_on = {"Lock", "Grid", "Endpoint", "Midpoint", "Perpendicular", "Center", "Ortho", "Intersection", "Dimensions"}
     draft.SetString("snapModes", "".join("1" if n in snap_on else "0" for n in snap_order))
     draft.SetBool("alwaysSnap", True)
+
+    # 3D-Ansicht: "Line smoothing" (AntiAliasing=1) macht transparente Flächen deckend und
+    # Randbedingungs-Symbole schwarz hinterlegt; daher ausschalten
+    view = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/View")
+    view.SetInt("AntiAliasing", 0)
+    # Größerer Cursor beim Zeichnen
+    view.SetInt("CursorSize", 48)
 
     # Layout: linkes Panel (Modell/Aufgaben) beim nächsten Start auf eine schmale Breite setzen
     mint.SetBool("ApplyLayout", True)
