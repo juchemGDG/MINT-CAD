@@ -1,0 +1,656 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""MINT-CAD: erzeugt die Screenshots für die Anleitungen (Skizze -> Körper -> Zeichnung).
+
+Start (echtes Fenster, eigenes Profil, damit das Nutzerprofil unberührt bleibt):
+    SHOTDIR=<Ausgabe> FREECAD_USER_HOME=<leerer Ordner> build/release/bin/FreeCAD tools/mintcad/docshots/shots.py
+
+Das 3D-Bild wird per glReadPixels gelesen und in den Fenster-Screenshot einkopiert (QOpenGLWidget
+liefert über grab() nur Schwarz). Jeder Schritt ist einzeln abgesichert; Fehler stehen in log.txt.
+"""
+import ctypes
+import math
+import os
+import traceback
+
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+import Sketcher
+from PySide6 import QtCore, QtGui, QtOpenGLWidgets, QtWidgets
+
+OUT = os.environ.get("SHOTDIR", "/tmp/mintcad-shots")
+os.makedirs(OUT, exist_ok=True)
+V = App.Vector
+GL = ctypes.CDLL("/System/Library/Frameworks/OpenGL.framework/OpenGL")
+STEPS = []
+
+
+def log(msg):
+    with open(os.path.join(OUT, "log.txt"), "a", encoding="utf-8") as fh:
+        fh.write(str(msg) + "\n")
+
+
+def step(delay=1800):
+    def deco(fn):
+        STEPS.append((fn, delay))
+        return fn
+
+    return deco
+
+
+def run(i=0):
+    if i >= len(STEPS):
+        log("fertig")
+        os._exit(0)
+    fn, delay = STEPS[i]
+    try:
+        fn()
+    except Exception:
+        log("FEHLER in %s\n%s" % (fn.__name__, traceback.format_exc()))
+    QtCore.QTimer.singleShot(delay, lambda: run(i + 1))
+
+
+# ----------------------------------------------------------------------------- Bildaufnahme
+def mw():
+    return Gui.getMainWindow()
+
+
+def gl_widget():
+    for g in mw().findChildren(QtOpenGLWidgets.QOpenGLWidget):
+        if g.isVisible() and g.width() > 200:
+            return g
+    return None
+
+
+def read_gl(g):
+    r = g.devicePixelRatio()
+    w, h = int(g.width() * r), int(g.height() * r)
+    g.makeCurrent()
+    GL.glBindFramebuffer(0x8D40, g.defaultFramebufferObject())
+    buf = ctypes.create_string_buffer(w * h * 4)
+    GL.glReadPixels(0, 0, w, h, 0x1908, 0x1401, buf)
+    g.doneCurrent()
+    return QtGui.QImage(buf.raw, w, h, w * 4, QtGui.QImage.Format_RGBA8888).mirrored(False, True).copy()
+
+
+def rect_in_window(widget):
+    tl = widget.mapTo(mw(), QtCore.QPoint(0, 0))
+    return QtCore.QRect(tl, widget.size())
+
+
+def region(name):
+    win = mw()
+    W, H = win.width(), win.height()
+    ribbon = win.findChild(QtWidgets.QToolBar, "MintRibbonToolBar")
+    rb = rect_in_window(ribbon).bottom() + 1 if ribbon else 170
+    g = gl_widget()
+    if name == "alles":
+        return QtCore.QRect(0, 0, W, H)
+    if name == "band":
+        return QtCore.QRect(0, 0, W, rb)
+    if name == "gl":
+        return rect_in_window(g)
+    if name == "panel+gl":
+        return QtCore.QRect(0, rb, W, H - rb - 30)
+    if name == "panel":
+        dock = [d for d in win.findChildren(QtWidgets.QDockWidget) if d.isVisible()]
+        r = QtCore.QRect()
+        for d in dock:
+            if rect_in_window(d).left() < 50:
+                r = r.united(rect_in_window(d))
+        return r
+    if name == "status":
+        sb = win.statusBar()
+        r = rect_in_window(sb)
+        return QtCore.QRect(r.right() - 520, r.top(), 520, r.height())
+    raise KeyError(name)
+
+
+def shot(name, where="alles", width=1100, gl_only=False):
+    win = mw()
+    QtWidgets.QApplication.processEvents()
+    img = win.grab().toImage()
+    dpr = img.devicePixelRatio() if img.devicePixelRatio() > 1 else img.width() / win.width()
+    g = gl_widget()
+    if g is not None:
+        gl = read_gl(g)
+        p = QtGui.QPainter(img)
+        pos = rect_in_window(g).topLeft()
+        p.drawImage(QtCore.QPoint(int(pos.x() * dpr), int(pos.y() * dpr)), gl)
+        p.end()
+    r = region(where)
+    crop = img.copy(int(r.x() * dpr), int(r.y() * dpr), int(r.width() * dpr), int(r.height() * dpr))
+    if crop.width() > width:
+        crop = crop.scaledToWidth(width, QtCore.Qt.SmoothTransformation)
+    crop.save(os.path.join(OUT, name + ".png"))
+    log("Bild %s %dx%d" % (name, crop.width(), crop.height()))
+
+
+# ----------------------------------------------------------------------------- Modellierung
+def new_body(label):
+    doc = App.newDocument(label)
+    body = doc.addObject("PartDesign::Body", "Body")
+    body.Label = "Körper"
+    Gui.ActiveDocument.ActiveView.setActiveObject("pdbody", body)
+    doc.recompute()
+    return doc, body
+
+
+def origin_plane(body, role):
+    return [f for f in body.Origin.OriginFeatures if f.Role == role][0]
+
+
+def sketch_on(body, name, support, sub=""):
+    sk = body.newObject("Sketcher::SketchObject", name)
+    sk.AttachmentSupport = (support, [sub])
+    sk.MapMode = "FlatFace"
+    return sk
+
+
+def polygon(sk, pts, dims=True, origin=True):
+    n = len(pts)
+    for i in range(n):
+        sk.addGeometry(Part.LineSegment(V(*pts[i], 0), V(*pts[(i + 1) % n], 0)), False)
+    for i in range(n):
+        sk.addConstraint(Sketcher.Constraint("Coincident", i, 2, (i + 1) % n, 1))
+    for i in range(n):
+        (x0, y0), (x1, y1) = pts[i], pts[(i + 1) % n]
+        if abs(y1 - y0) < 1e-9:
+            sk.addConstraint(Sketcher.Constraint("Horizontal", i))
+        elif abs(x1 - x0) < 1e-9:
+            sk.addConstraint(Sketcher.Constraint("Vertical", i))
+    if origin:
+        sk.addConstraint(Sketcher.Constraint("Coincident", 0, 1, -1, 1))
+    if dims:
+        for i in range(n):
+            (x0, y0), (x1, y1) = pts[i], pts[(i + 1) % n]
+            c = None
+            if abs(y1 - y0) < 1e-9 and abs(x1 - x0) > 1e-9:
+                a, b = (1, 2) if x1 > x0 else (2, 1)
+                c = Sketcher.Constraint("DistanceX", i, a, i, b, abs(x1 - x0))
+            elif abs(x1 - x0) < 1e-9 and abs(y1 - y0) > 1e-9:
+                a, b = (1, 2) if y1 > y0 else (2, 1)
+                c = Sketcher.Constraint("DistanceY", i, a, i, b, abs(y1 - y0))
+            if c is not None:
+                idx = sk.addConstraint(c)
+                if sk.solve() != 0 or sk.RedundantConstraints or sk.ConflictingConstraints:
+                    sk.delConstraint(idx)
+    return sk
+
+
+def edit(sk):
+    sk.Document.recompute()
+    Gui.ActiveDocument.setEdit(sk.Name)
+
+
+def leave():
+    Gui.ActiveDocument.resetEdit()
+    Gui.SendMsgToActiveView("ViewFit")
+
+
+def fit():
+    Gui.SendMsgToActiveView("ViewFit")
+
+
+def iso():
+    Gui.ActiveDocument.ActiveView.viewIsometric()
+    fit()
+
+
+def click_button(text):
+    for b in mw().findChildren(QtWidgets.QPushButton):
+        if b.isVisible() and b.text().replace("&", "") == text:
+            b.click()
+            return True
+    return False
+
+
+def close_dialog():
+    Gui.Control.closeDialog()
+
+
+def front_face(shape):
+    """Fläche mit Normale -Y am kleinsten Y (Vorderseite bei Skizze auf der XZ-Ebene)."""
+    ymin = shape.BoundBox.YMin
+    for i, f in enumerate(shape.Faces):
+        if abs(f.BoundBox.YMin - ymin) < 1e-6 and abs(f.BoundBox.YMax - ymin) < 1e-6:
+            return "Face%d" % (i + 1)
+    return None
+
+
+def to_local(sk, gx, gy, gz):
+    return sk.Placement.inverse().multVec(V(gx, gy, gz))
+
+
+STATE = {}
+
+# ============================================================================ Teil 1
+P1 = [(0, 0), (40, 0), (40, 10), (25, 50), (15, 50), (15, 35), (0, 35)]
+
+
+@step(2500)
+def start():
+    win = mw()
+    win.showNormal()
+    win.resize(1500, 940)
+    Gui.activateWorkbench("PartDesignWorkbench")
+    STATE["doc"], STATE["body"] = new_body("Bauteil_1")
+
+
+@step(1500)
+def s_band():
+    shot("pd_01_band", "band")
+    shot("pd_02_statusleiste", "status", width=520)
+
+
+@step(1800)
+def s_neue_skizze_dialog():
+    Gui.Selection.clearSelection()
+    Gui.runCommand("PartDesign_CompSketches", 0)
+    # 3D-Ansicht schräg, damit die drei Ebenen zu sehen sind
+    Gui.ActiveDocument.ActiveView.viewIsometric()
+    fit()
+
+
+@step(1800)
+def s_ebenenwahl():
+    shot("pd_03_ebenenwahl", "panel+gl")
+    close_dialog()
+
+
+@step(1500)
+def s_skizze_umriss():
+    body = STATE["body"]
+    sk = sketch_on(body, "Skizze", origin_plane(body, "XZ_Plane"))
+    polygon(sk, P1, dims=False, origin=False)
+    STATE["sk1"] = sk
+    edit(sk)
+    fit()
+
+
+@step(2200)
+def s_umriss_shot():
+    shot("pd_04_skizzentools", "band")
+    shot("pd_05_umriss", "panel+gl")
+
+
+@step(1500)
+def s_bemasst():
+    sk = STATE["sk1"]
+    sk.addConstraint(Sketcher.Constraint("Coincident", 0, 1, -1, 1))
+    polygon_dims(sk, P1)
+    sk.Document.recompute()
+    fit()
+
+
+def polygon_dims(sk, pts):
+    n = len(pts)
+    for i in range(n):
+        (x0, y0), (x1, y1) = pts[i], pts[(i + 1) % n]
+        c = None
+        if abs(y1 - y0) < 1e-9 and abs(x1 - x0) > 1e-9:
+            a, b = (1, 2) if x1 > x0 else (2, 1)
+            c = Sketcher.Constraint("DistanceX", i, a, i, b, abs(x1 - x0))
+        elif abs(x1 - x0) < 1e-9 and abs(y1 - y0) > 1e-9:
+            a, b = (1, 2) if y1 > y0 else (2, 1)
+            c = Sketcher.Constraint("DistanceY", i, a, i, b, abs(y1 - y0))
+        if c is not None:
+            idx = sk.addConstraint(c)
+            if sk.solve() != 0 or sk.RedundantConstraints or sk.ConflictingConstraints:
+                sk.delConstraint(idx)
+
+
+@step(2200)
+def s_bemasst_shot():
+    log("Skizze 1 voll bestimmt: %s" % STATE["sk1"].FullyConstrained)
+    shot("pd_06_bemasst", "panel+gl")
+    shot("pd_07_randbedingungen", "band")
+
+
+@step(1500)
+def s_pad_dialog():
+    leave()
+    sk = STATE["sk1"]
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(sk)
+    Gui.runCommand("PartDesign_Pad", 0)
+    iso()
+
+
+@step(2000)
+def s_pad_shot():
+    shot("pd_08_pad_dialog", "panel+gl")
+    close_dialog()
+    body, sk = STATE["body"], STATE["sk1"]
+    pad = body.newObject("PartDesign::Pad", "Pad")
+    pad.Profile = sk
+    pad.Length = 30
+    sk.Visibility = False
+    STATE["doc"].recompute()
+    STATE["pad"] = pad
+    iso()
+
+
+@step(1800)
+def s_pad_ergebnis():
+    shot("pd_09_pad_ergebnis", "gl", width=800)
+
+
+@step(1500)
+def s_tasche_skizze():
+    body, pad = STATE["body"], STATE["pad"]
+    face = front_face(pad.Shape)
+    log("Vorderseite: %s (YMin=%.1f)" % (face, pad.Shape.BoundBox.YMin))
+    Gui.ActiveDocument.ActiveView.viewFront()
+    fit()
+    sk = sketch_on(body, "Skizze_Tasche", pad, face)
+    sk.Document.recompute()
+    y = pad.Shape.BoundBox.YMin
+    pts = [to_local(sk, x, y, z) for x, z in ((-5, 20), (45, 20), (45, 55), (-5, 55))]
+    for i in range(4):
+        a, b = pts[i], pts[(i + 1) % 4]
+        sk.addGeometry(Part.LineSegment(V(a.x, a.y, 0), V(b.x, b.y, 0)), False)
+    for i in range(4):
+        sk.addConstraint(Sketcher.Constraint("Coincident", i, 2, (i + 1) % 4, 1))
+        a, b = pts[i], pts[(i + 1) % 4]
+        sk.addConstraint(Sketcher.Constraint("Horizontal" if abs(b.y - a.y) < 1e-6 else "Vertical", i))
+    STATE["sk2"] = sk
+    edit(sk)
+    fit()
+
+
+@step(2200)
+def s_tasche_skizze_shot():
+    shot("pd_10_tasche_skizze", "panel+gl")
+
+
+@step(1500)
+def s_tasche_dialog():
+    leave()
+    sk = STATE["sk2"]
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(sk)
+    Gui.runCommand("PartDesign_Pocket", 0)
+    iso()
+
+
+@step(2000)
+def s_tasche_shot():
+    shot("pd_11_tasche_dialog", "panel+gl")
+    close_dialog()
+    body, sk = STATE["body"], STATE["sk2"]
+    pocket = body.newObject("PartDesign::Pocket", "Tasche")
+    pocket.Profile = sk
+    pocket.Length = 15
+    sk.Visibility = False
+    STATE["doc"].recompute()
+    STATE["pocket"] = pocket
+    iso()
+
+
+@step(1800)
+def s_tasche_ergebnis():
+    shot("pd_12_tasche_ergebnis", "gl", width=800)
+
+
+@step(1500)
+def s_bohrung_skizze():
+    body, pocket = STATE["body"], STATE["pocket"]
+    face = front_face(pocket.Shape)
+    Gui.ActiveDocument.ActiveView.viewFront()
+    fit()
+    sk = sketch_on(body, "Skizze_Bohrung", pocket, face)
+    sk.Document.recompute()
+    y = pocket.Shape.BoundBox.YMin
+    c = to_local(sk, 20, y, 10)
+    sk.addGeometry(Part.Circle(V(c.x, c.y, 0), V(0, 0, 1), 7.5), False)
+    sk.addConstraint(Sketcher.Constraint("Diameter", 0, 15))
+    STATE["sk3"] = sk
+    edit(sk)
+    fit()
+
+
+@step(2200)
+def s_bohrung_skizze_shot():
+    shot("pd_13_bohrung_skizze", "panel+gl")
+
+
+@step(1500)
+def s_bohrung_dialog():
+    leave()
+    sk = STATE["sk3"]
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(sk)
+    Gui.runCommand("PartDesign_Hole", 0)
+    iso()
+
+
+@step(2200)
+def s_bohrung_shot():
+    shot("pd_14_bohrung_dialog", "panel+gl")
+    close_dialog()
+    body, sk = STATE["body"], STATE["sk3"]
+    hole = body.newObject("PartDesign::Hole", "Bohrung")
+    hole.Profile = sk
+    hole.Threaded = False
+    hole.Diameter = 15
+    hole.DepthType = "ThroughAll"
+    sk.Visibility = False
+    STATE["doc"].recompute()
+    log("Bohrung gültig: %s" % hole.Shape.isValid())
+    STATE["hole"] = hole
+    iso()
+
+
+@step(1800)
+def s_teil1_fertig():
+    shot("pd_15_teil1_fertig", "gl", width=800)
+    # Teilebaum: Reiter "Modell" zeigen, alles aufklappen
+    for tab in mw().findChildren(QtWidgets.QTabBar):
+        for i in range(tab.count()):
+            if tab.tabText(i) == "Modell":
+                tab.setCurrentIndex(i)
+    for tree in mw().findChildren(QtWidgets.QTreeWidget):
+        if tree.isVisible():
+            tree.expandAll()
+
+
+@step(1500)
+def s_baum():
+    shot("pd_16_teilebaum", "panel", width=520)
+
+
+# ============================================================================ Teil 2
+@step(2000)
+def teil2_start():
+    STATE["doc"], STATE["body"] = new_body("Bauteil_2")
+    body = STATE["body"]
+    sk = sketch_on(body, "Skizze", origin_plane(body, "XZ_Plane"))
+    pts = [(4, 0), (10, 0), (10, 20), (6, 20), (6, 16), (4, 16)]
+    polygon(sk, pts, dims=False, origin=False)
+    sk.addConstraint(Sketcher.Constraint("Coincident", 0, 1, -1, 1)) if False else None
+    STATE["sk4"] = sk
+    edit(sk)
+    fit()
+
+
+@step(2200)
+def teil2_skizze_shot():
+    shot("pd_17_rotation_skizze", "panel+gl")
+
+
+@step(1500)
+def teil2_dialog():
+    leave()
+    sk = STATE["sk4"]
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(sk)
+    Gui.runCommand("PartDesign_Revolution", 0)
+    iso()
+
+
+@step(2200)
+def teil2_dialog_shot():
+    shot("pd_18_rotation_dialog", "panel+gl")
+    close_dialog()
+    body, sk = STATE["body"], STATE["sk4"]
+    rev = body.newObject("PartDesign::Revolution", "Drehen")
+    rev.Profile = sk
+    rev.ReferenceAxis = (sk, ["V_Axis"])
+    rev.Angle = 180
+    sk.Visibility = False
+    STATE["doc"].recompute()
+    STATE["rev"] = rev
+    iso()
+
+
+@step(1800)
+def teil2_ergebnis():
+    shot("pd_19_rotation_ergebnis", "gl", width=800)
+
+
+@step(1500)
+def fase_dialog():
+    rev = STATE["rev"]
+    # eine Kante der Außenseite oben wählen (Kreisbogen mit Radius 10 bei z=20)
+    for i, e in enumerate(rev.Shape.Edges):
+        if abs(e.BoundBox.ZMin - 20) < 1e-6 and abs(e.BoundBox.ZMax - 20) < 1e-6 and e.BoundBox.XMax > 9.9:
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection(STATE["doc"].Name, "Body", "Drehen.Edge%d" % (i + 1))
+            break
+    Gui.runCommand("PartDesign_Chamfer", 0)
+    iso()
+
+
+@step(2200)
+def fase_shot():
+    shot("pd_20_fase_dialog", "panel+gl")
+    close_dialog()
+
+
+@step(1500)
+def bezugsebene_dialog():
+    body = STATE["body"]
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(STATE["doc"].Name, origin_plane(body, "XZ_Plane").Name)
+    Gui.runCommand("PartDesign_Plane", 0)
+    iso()
+
+
+@step(2200)
+def bezugsebene_shot():
+    shot("pd_21_bezugsebene_dialog", "panel+gl")
+    close_dialog()
+
+
+# ============================================================================ Muster
+@step(2000)
+def muster_start():
+    STATE["doc"], STATE["body"] = new_body("Bauteil_3")
+    body = STATE["body"]
+    sk = sketch_on(body, "Skizze", origin_plane(body, "XY_Plane"))
+    pts = [(-30, -30), (30, -30), (30, 30), (-30, 30)]
+    polygon(sk, pts, dims=False, origin=False)
+    sk.Document.recompute()
+    pad = body.newObject("PartDesign::Pad", "Pad")
+    pad.Profile = sk
+    pad.Length = 10
+    sk.Visibility = False
+    STATE["doc"].recompute()
+    top = [i for i, f in enumerate(pad.Shape.Faces) if abs(f.BoundBox.ZMin - 10) < 1e-6 and abs(f.BoundBox.ZMax - 10) < 1e-6][0]
+    sk2 = sketch_on(body, "Skizze_Loch", pad, "Face%d" % (top + 1))
+    sk2.Document.recompute()
+    c = to_local(sk2, 20, 0, 10)
+    sk2.addGeometry(Part.Circle(V(c.x, c.y, 0), V(0, 0, 1), 4), False)
+    sk2.addConstraint(Sketcher.Constraint("Diameter", 0, 8))
+    sk2.Document.recompute()
+    pocket = body.newObject("PartDesign::Pocket", "Loch")
+    pocket.Profile = sk2
+    pocket.Type = 1
+    sk2.Visibility = False
+    STATE["doc"].recompute()
+    STATE["loch"] = pocket
+    iso()
+
+
+@step(1800)
+def polar_dialog():
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(STATE["doc"].Name, "Body", "Loch.")
+    Gui.runCommand("PartDesign_PolarPattern", 0)
+    iso()
+
+
+@step(2200)
+def polar_shot():
+    shot("pd_22_polar_dialog", "panel+gl")
+    close_dialog()
+    body = STATE["body"]
+    pp = body.newObject("PartDesign::PolarPattern", "Kreismuster")
+    pp.Originals = [STATE["loch"]]
+    pp.Axis = (origin_axis(body, "Z_Axis"), [""])
+    pp.Angle = 360
+    pp.Occurrences = 4
+    body.Tip = pp
+    STATE["doc"].recompute()
+    iso()
+
+
+def origin_axis(body, role):
+    return [f for f in body.Origin.OriginFeatures if f.Role == role][0]
+
+
+@step(1800)
+def polar_ergebnis():
+    shot("pd_23_polar_ergebnis", "gl", width=800)
+
+
+# ============================================================================ Zeichnung (TechDraw)
+@step(2500)
+def td_start():
+    # Bauteil 1 nochmals öffnen: aus dem fertigen Dokument ableiten
+    STATE["doc"] = App.getDocument("Bauteil_1")
+    App.setActiveDocument("Bauteil_1")
+    Gui.ActiveDocument = Gui.getDocument("Bauteil_1")
+    Gui.ActiveDocument.ActiveView.viewFront()
+    fit()
+    Gui.activateWorkbench("TechDrawWorkbench")
+
+
+@step(2000)
+def td_band():
+    shot("td_01_band", "band")
+
+
+@step(1500)
+def td_seite():
+    Gui.runCommand("TechDraw_PageDefault", 0)
+
+
+@step(2500)
+def td_seite_shot():
+    shot("td_02_seite_leer", "alles", width=1100)
+    page = [o for o in App.getDocument("Bauteil_1").Objects if o.TypeId == "TechDraw::DrawPage"]
+    STATE["page"] = page[0] if page else None
+    log("Seite: %s" % (page[0].Name if page else "keine"))
+
+
+@step(1500)
+def td_ansicht_dialog():
+    doc = App.getDocument("Bauteil_1")
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(doc.Name, "Body")
+    Gui.runCommand("TechDraw_ProjGroup", 0)
+
+
+@step(2500)
+def td_ansicht_shot():
+    shot("td_03_ansichten_dialog", "alles", width=1100)
+    click_button("OK")
+
+
+@step(2500)
+def td_ansicht_fertig():
+    shot("td_04_ansichten_angeordnet", "alles", width=1100)
+    for o in App.getDocument("Bauteil_1").Objects:
+        log("Objekt: %s %s" % (o.Name, o.TypeId))

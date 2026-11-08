@@ -1,0 +1,15 @@
+MINT-CAD
+========
+
+MINT-CAD ist eine für den Schulunterricht vereinfachte Fassung von FreeCAD (https://www.freecad.org).
+FreeCAD und diese Fassung stehen unter der GNU Lesser General Public License, Version 2.1 oder neuer
+(siehe Datei LICENSE im Programmpaket unter Contents/Resources).
+
+Installation auf dem Mac (Apple Silicon)
+----------------------------------------
+1. MINT-CAD in den Ordner "Programme" ziehen.
+2. Das Programm ist nicht von Apple beglaubigt. Beim ersten Start meldet macOS deshalb,
+   dass es nicht geöffnet werden kann. Dann unter Systemeinstellungen > Datenschutz & Sicherheit
+   "Trotzdem öffnen" wählen.
+
+Dateien im Format .FCStd lassen sich auch mit FreeCAD öffnen.
