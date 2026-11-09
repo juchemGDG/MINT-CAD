@@ -32,6 +32,16 @@ DESTDIR="$STAGE" pixi run cmake --install build/release >"$OUT/install.log"
 cp -a "$STAGE$ENVDIR"/ "$RES"/
 rm -rf "$STAGE"
 
+echo "== Pakete entfernen, die MINT-CAD nicht braucht (Entwicklungswerkzeuge, Bibliotheken der entfernten Module)"
+# Reihenfolge: vor dem Löschen von conda-meta, denn die Dateilisten kommen von dort
+"$ENVDIR/bin/python" -I "$MAC/remove_packages.py" "$ENVDIR" "$RES" \
+    pythonocc-core pcl ifcopenshell libopencv opencv py-opencv flann \
+    libopenvino libopenvino-arm-cpu-plugin libopenvino-auto-batch-plugin libopenvino-auto-plugin libopenvino-hetero-plugin \
+    libopenvino-ir-frontend libopenvino-onnx-frontend libopenvino-paddle-frontend libopenvino-pytorch-frontend \
+    libopenvino-tensorflow-frontend libopenvino-tensorflow-lite-frontend \
+    ffmpeg x264 x265 git swig sed cmake doxygen debugpy virtualenv mysql-common mysql-libs
+# Plugins, die auf entfernte Bibliotheken verweisen
+find "$RES" \( -name 'libvtkIOFFMPEG*' -o -name 'vtkIOFFMPEG*' -o -name 'libqsqlmysql*' \) -delete
 echo "== Unnötiges entfernen"
 cd "$RES"
 rm -rf include man conda-meta var libexec/gcc share/doc share/man share/info share/gtk-doc \
@@ -52,6 +62,7 @@ rm -rf bin_tmp
 if [ -f bin/pip ]; then sed -i '' '1s|.*|#!/usr/bin/env python|' bin/pip; fi
 
 cp "$MAC/mintcad.icns" "$RES/mintcad.icns"
+"$ENVDIR/bin/python" -I "$ROOT/tools/mintcad/make_third_party.py" "$RES" >/dev/null   # Paketliste = was wirklich im Paket liegt
 cp "$ROOT/LICENSE" "$ROOT/THIRD-PARTY.md" "$ROOT/THIRD-PARTY-PACKAGES.md" "$RES/"
 
 echo "== Pfade der Bibliotheken bereinigen"

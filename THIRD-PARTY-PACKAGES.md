@@ -1,6 +1,6 @@
 # Enthaltene Fremdpakete (automatisch erzeugt)
 
-296 Pakete aus conda-forge (und dem FreeCAD-Kanal) mit Version und Lizenz laut Paketangaben. Quellcode jedes Pakets: `https://github.com/conda-forge/<Paketname>-feedstock` (Verweis auf die Originalquellen) oder über https://anaconda.org/conda-forge/<Paketname>. Erzeugt mit `tools/mintcad/make_third_party.py`.
+268 Pakete aus conda-forge (und dem FreeCAD-Kanal) mit Version und Lizenz laut Paketangaben. Quellcode jedes Pakets: `https://github.com/conda-forge/<Paketname>-feedstock` (Verweis auf die Originalquellen) oder über https://anaconda.org/conda-forge/<Paketname>. Erzeugt mit `tools/mintcad/make_third_party.py`.
 
 | Paket | Version | Lizenz |
 |---|---|---|
@@ -30,7 +30,6 @@
 | charset-normalizer | 3.4.4 | MIT |
 | clang_osx-arm64 | 18.1.8 | BSD-3-Clause |
 | clangxx_osx-arm64 | 18.1.8 | BSD-3-Clause |
-| cmake | 4.2.1 | BSD-3-Clause |
 | coin3d | 4.0.3 | BSD-3-Clause |
 | colorama | 0.4.6 | BSD-3-Clause |
 | conda | 23.9.0 | BSD-3-Clause |
@@ -43,7 +42,6 @@
 | cyrus-sasl | 2.1.28 | BSD-3-Clause-Attribution |
 | dav1d | 1.2.1 | BSD-2-Clause |
 | dbus | 1.16.2 | GPL-2.0-or-later |
-| debugpy | 1.8.18 | MIT |
 | defusedxml | 0.7.1 | PSF-2.0 |
 | distlib | 0.4.0 | Apache-2.0 |
 | docutils | 0.22.3 | CC-PDDC AND BSD-3-Clause AND BSD-2-Clause AND ZPL-2.1 |
@@ -51,9 +49,7 @@
 | eigen | 3.4.0 | MPL-2.0 |
 | epoxy | 1.5.10 | MIT |
 | expat | 2.7.3 | MIT |
-| ffmpeg | 7.1.1 | GPL-2.0-or-later |
 | filelock | 3.20.0 | Unlicense |
-| flann | 1.9.2 | BSD-3-Clause |
 | fltk | 1.3.10 | LGPL-2.0-or-later |
 | fmt | 12.0.0 | MIT |
 | font-ttf-dejavu-sans-mono | 2.37 | BSD-3-Clause |
@@ -70,7 +66,6 @@
 | geos | 3.14.1 | LGPL-2.1-only |
 | gfortran_impl_osx-arm64 | 13.4.0 | GPL-3.0-only WITH GCC-exception-3.1 |
 | gfortran_osx-arm64 | 13.4.0 | GPL-3.0-or-later WITH GCC-exception-3.1 |
-| git | 2.51.0 | GPL-2.0-or-later and LGPL-2.1-or-later |
 | gl2ps | 1.4.2 | LGPL-2.0-or-later |
 | glew | 2.1.0 | BSD-3-Clause |
 | glib-tools | 2.84.3 | LGPL-2.1-or-later |
@@ -91,7 +86,6 @@
 | icu | 75.1 | MIT |
 | identify | 2.6.15 | MIT |
 | idna | 3.11 | BSD-3-Clause |
-| ifcopenshell | 0.8.4 | LGPL-3.0-or-later |
 | imath | 3.1.12 | BSD-3-Clause |
 | isl | 0.26 | MIT |
 | jasper | 4.2.8 | JasPer-2.0 |
@@ -147,18 +141,6 @@
 | libntlm | 1.8 | LGPL-2.1-or-later |
 | libogg | 1.3.5 | BSD-3-Clause |
 | libopenblas | 0.3.30 | BSD-3-Clause |
-| libopencv | 4.11.0 | Apache-2.0 |
-| libopenvino | 2025.0.0 | unbekannt |
-| libopenvino-arm-cpu-plugin | 2025.0.0 | unbekannt |
-| libopenvino-auto-batch-plugin | 2025.0.0 | unbekannt |
-| libopenvino-auto-plugin | 2025.0.0 | unbekannt |
-| libopenvino-hetero-plugin | 2025.0.0 | unbekannt |
-| libopenvino-ir-frontend | 2025.0.0 | unbekannt |
-| libopenvino-onnx-frontend | 2025.0.0 | unbekannt |
-| libopenvino-paddle-frontend | 2025.0.0 | unbekannt |
-| libopenvino-pytorch-frontend | 2025.0.0 | unbekannt |
-| libopenvino-tensorflow-frontend | 2025.0.0 | unbekannt |
-| libopenvino-tensorflow-lite-frontend | 2025.0.0 | unbekannt |
 | libopus | 1.5.2 | BSD-3-Clause |
 | libpng | 1.6.53 | zlib-acknowledgement |
 | libpq | 17.7 | PostgreSQL |
@@ -193,8 +175,6 @@
 | msgpack-python | 1.1.2 | Apache-2.0 |
 | multidict | 6.7.0 | Apache-2.0 |
 | munkres | 1.1.4 | Apache-2.0 |
-| mysql-common | 9.3.0 | GPL-2.0-or-later |
-| mysql-libs | 9.3.0 | GPL-2.0-or-later |
 | ncurses | 6.5 | X11 AND BSD-3-Clause |
 | nine | 1.1.0 | Public domain |
 | nlohmann_json | 3.12.0 | MIT |
@@ -210,7 +190,6 @@
 | packaging | 25.0 | Apache-2.0 |
 | pandas | 2.3.3 | BSD-3-Clause |
 | pango | 1.56.4 | LGPL-2.1-or-later |
-| pcl | 1.15.0 | BSD-3-Clause |
 | pcre2 | 10.45 | BSD-3-Clause |
 | pillow | 12.0.0 | HPND |
 | pip | 25.3 | MIT |
@@ -235,7 +214,6 @@
 | python | 3.11.14 | Python-2.0 |
 | python-dateutil | 2.9.0.post0 | Apache-2.0 |
 | python-tzdata | 2025.3 | Apache-2.0 |
-| pythonocc-core | 7.8.1.1 | LGPL-3.0-or-later |
 | pytz | 2025.2 | MIT |
 | pyyaml | 6.0.3 | MIT |
 | qhull | 2020.2 | LicenseRef-Qhull |
@@ -249,7 +227,6 @@
 | scipy | 1.16.3 | BSD-3-Clause |
 | sdl2 | 2.32.56 | Zlib |
 | sdl3 | 3.2.28 | Zlib |
-| sed | 4.9 | GPL-3.0-only |
 | setuptools | 80.9.0 | MIT |
 | shapely | 2.1.2 | BSD-3-Clause |
 | sigtool | 0.1.3 | MIT |
@@ -259,7 +236,6 @@
 | soqt6 | 1.6.3 | BSD-3-Clause |
 | svgwrite | 1.4.3 | MIT |
 | svt-av1 | 3.0.2 | BSD-2-Clause |
-| swig | 4.3.1 | GPL-3.0-or-later |
 | sympy | 1.14.0 | BSD-3-Clause |
 | tapi | 1300.6.5 | NCSA |
 | tbb | 2022.3.0 | Apache-2.0 |
@@ -274,13 +250,9 @@
 | ukkonen | 1.0.1 | MIT |
 | unicodedata2 | 17.0.0 | Apache-2.0 |
 | urllib3 | 2.6.2 | MIT |
-| virtualenv | 20.35.4 | MIT |
 | vtk-base | 9.3.1 | BSD-3-Clause |
-| vtk-io-ffmpeg | 9.3.1 | BSD-3-Clause |
 | wheel | 0.45.1 | MIT |
 | wslink | 2.5.0 | BSD-3-Clause |
-| x264 | 1!164.3095 | GPL-2.0-or-later |
-| x265 | 3.5 | GPL-2.0-or-later |
 | xerces-c | 3.3.0 | Apache-2.0 |
 | xlrd | 2.0.2 | BSD-3-Clause AND BSD-4-Clause |
 | xlutils | 2.0.0 | MIT |
