@@ -25,7 +25,7 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
    bekanntes Problem (auch ohne MINT-CAD-Theme): schwarze Hintergründe bei Sketcher-Constraint-Symbolen auf macOS
 6. Unterrichtshilfen                                                <- erledigt: Vorlagen A4 quer/hoch + A3 quer (Schulschriftfeld), Beispiele Winkelstück/Welle/Platte, Kurzanleitung (Hilfe-Menü);
    Hilfsskripte: tools/mintcad/make_templates.py, make_examples.py
-7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)
+7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)  <- macOS-DMG fertig; Windows-Installer und Linux-AppImage: Skripte geschrieben, Test auf Zielsystem offen (docs/nitcad/BUILD-windows-linux.md)
 8. Test mit Schülern, Upstream-Pflege
 
 ## Commit-Konventionen

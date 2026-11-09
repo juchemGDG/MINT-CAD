@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=MINT-CAD
+GenericName=CAD-Programm für den Unterricht
+Comment=Skizzieren, Konstruieren und Technisches Zeichnen (vereinfachte Fassung von FreeCAD)
+Exec=AppRun --single-instance %F
+Terminal=false
+Type=Application
+Icon=de.mint-checker.MINT-CAD
+Categories=Graphics;Science;Education;Engineering;
+StartupNotify=true
+StartupWMClass=MINT-CAD
+MimeType=application/x-extension-fcstd;model/step;model/stl;
