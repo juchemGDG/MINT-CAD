@@ -5,4 +5,5 @@ set -e
 cd "$(dirname "$0")/../.."
 # Flags wie bei den pixi-Aufgaben "configure-release" (leer, sonst greifen GCC-Flags der Conda-Aktivierung)
 CFLAGS="" CXXFLAGS="" DEBUG_CFLAGS="" DEBUG_CXXFLAGS="" \
-    pixi run cmake --preset conda-linux-release -C tools/mintcad/options.cmake
+    # CMAKE_INSTALL_LIBDIR=lib: sonst installiert CMake auf Debian/Ubuntu nach lib/x86_64-linux-gnu (wie im FreeCAD-Rezept)
+    pixi run cmake --preset conda-linux-release -C tools/mintcad/options.cmake -DCMAKE_INSTALL_LIBDIR=lib
