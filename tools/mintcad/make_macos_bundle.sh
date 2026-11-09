@@ -37,6 +37,9 @@ cd "$RES"
 rm -rf include man conda-meta var libexec/gcc share/doc share/man share/info share/gtk-doc \
        lib/clang lib/perl5 lib/cmake lib/pkgconfig lib/python3.11/test lib/libclang* lib/libLLVM*
 find . -name '*.a' -delete
+# nicht benötigte Qt-Module von PySide und Entwicklerwerkzeuge (ihre Bibliotheken fehlen ohnehin)
+rm -f lib/libLTO* lib/qt6/bin/{qdoc,lupdate,lrelease,lconvert,qtattributionsscanner}
+rm -f lib/python3.11/site-packages/PySide6/{Qt3D*,QtCharts,QtDataVisualization,QtGraphs*,QtSpatialAudio,QtMultimedia*,QtQuick3D}.cpython-311-darwin.so
 find . -name '__pycache__' -type d -prune -exec rm -rf {} +
 mv bin bin_tmp && mkdir bin
 mv bin_tmp/FreeCAD bin/freecad
@@ -53,6 +56,7 @@ cp "$ROOT/LICENSE" "$RES/LICENSE"
 echo "== Pfade der Bibliotheken bereinigen"
 cd "$ROOT"
 "$ENVDIR/bin/python" -I package/rattler-build/scripts/fix_macos_lib_paths.py "$RES/lib" -r >"$OUT/fixpaths.log"
+install_name_tool -id @rpath/libedit.0.dylib "$RES/lib/libedit.0.dylib"
 # absolute RPATHs in die Entwicklungsumgebung entfernen
 "$ENVDIR/bin/python" -I - "$RES" "$ROOT" <<'PY'
 import os, subprocess, sys, re
@@ -68,6 +72,25 @@ for base, _, names in os.walk(res):
                 subprocess.run(["install_name_tool", "-delete_rpath", rp, p], check=False)
 PY
 
+
+# Dateien, die danach keinen RPATH mehr haben, bekommen einen relativen Pfad auf lib/
+"$ENVDIR/bin/python" -I - "$RES" <<'PY'
+import os, subprocess, sys
+res = sys.argv[1]; lib = os.path.join(res, "lib")
+for base, _, names in os.walk(res):
+    for n in names:
+        p = os.path.join(base, n)
+        if os.path.islink(p) or not (n.endswith((".dylib", ".so")) or os.sep + "bin" + os.sep in p):
+            continue
+        if subprocess.run(["otool", "-l", p], capture_output=True, text=True).stdout.count("LC_RPATH"):
+            continue
+        deps = subprocess.run(["otool", "-L", p], capture_output=True, text=True).stdout
+        if "@rpath/" not in deps:
+            continue
+        rel = os.path.relpath(lib, base)
+        rel = "@loader_path" + ("" if rel == "." else "/" + rel)
+        subprocess.run(["install_name_tool", "-add_rpath", rel, p], check=False)
+PY
 echo "== Startprogramm und Info.plist"
 # Das System-clang findet mit dem neuen SDK die C++-Header nicht; der Compiler der Entwicklungsumgebung schon
 "$ENVDIR/bin/arm64-apple-darwin20.0.0-clang++" -std=c++17 -isysroot "$SDKROOT" -mmacosx-version-min=11.0 \

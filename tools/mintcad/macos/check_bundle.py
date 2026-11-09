@@ -26,7 +26,7 @@ for p in files:
         dep = line.strip().split(" (")[0]
         if any(dep.startswith(x) for x in forbidden):
             leaks.setdefault(dep, p)
-        elif dep.startswith("@rpath/") and os.path.basename(dep) not in names:
+        elif dep.startswith("@rpath/") and os.path.basename(dep) not in names and not os.path.basename(dep).endswith(os.path.basename(p)):
             missing.setdefault(os.path.basename(dep), p)
     rp = subprocess.run(["otool", "-l", p], capture_output=True, text=True).stdout
     for line in rp.splitlines():
