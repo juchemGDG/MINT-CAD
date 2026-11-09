@@ -42,7 +42,8 @@ rm -f lib/libLTO* lib/qt6/bin/{qdoc,lupdate,lrelease,lconvert,qtattributionsscan
 rm -f lib/python3.11/site-packages/PySide6/{Qt3D*,QtCharts,QtDataVisualization,QtGraphs*,QtSpatialAudio,QtMultimedia*,QtQuick3D}.cpython-311-darwin.so
 find . -name '__pycache__' -type d -prune -exec rm -rf {} +
 mv bin bin_tmp && mkdir bin
-mv bin_tmp/FreeCAD bin/freecad
+# Der Prozessname erscheint im Programmmenü ("Über …", "… beenden"), deshalb MINT-CAD statt freecad
+mv bin_tmp/FreeCAD bin/MINT-CAD
 mv bin_tmp/FreeCADCmd bin/freecadcmd
 for tool in ccx python python3 python3.11 pip pyside6-rcc dot unflatten gmsh; do
     if [ -e "bin_tmp/$tool" ]; then cp -a "bin_tmp/$tool" bin/; fi
@@ -93,8 +94,11 @@ for base, _, names in os.walk(res):
 PY
 echo "== Startprogramm und Info.plist"
 # Das System-clang findet mit dem neuen SDK die C++-Header nicht; der Compiler der Entwicklungsumgebung schon
+sed 's|Resources/bin/freecad"|Resources/bin/MINT-CAD"|' "$LAUNCHER" >"$OUT/launcher.cpp"
+grep -q 'Resources/bin/MINT-CAD' "$OUT/launcher.cpp"
 "$ENVDIR/bin/arm64-apple-darwin20.0.0-clang++" -std=c++17 -isysroot "$SDKROOT" -mmacosx-version-min=11.0 \
-    -o "$APP/Contents/MacOS/MINT-CAD" "$LAUNCHER"
+    -o "$APP/Contents/MacOS/MINT-CAD" "$OUT/launcher.cpp"
+rm -f "$OUT/launcher.cpp"
 sed -e 's/APPLICATION_MENU_NAME/MINT-CAD/' -e "s/FREECAD_VERSION/$VERSION/" \
     -e 's/<string>FreeCAD<\/string>/<string>MINT-CAD<\/string>/' \
     -e 's/freecad\.icns/mintcad.icns/' -e 's/org\.freecad\.FreeCAD/de.mint-checker.MINT-CAD/' \
