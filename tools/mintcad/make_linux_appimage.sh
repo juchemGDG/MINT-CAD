@@ -48,6 +48,35 @@ done
 rm -rf bin_tmp
 if [ -f bin/pip ]; then sed -i '1s|.*|#!/usr/bin/env python|' bin/pip; fi
 
+echo "== Suchpfade der Bibliotheken relativ machen (patchelf)"
+command -v patchelf >/dev/null || { echo "patchelf fehlt (Ubuntu: sudo apt install patchelf)"; exit 1; }
+"$USR/bin/python" -I - "$USR" "$ENVDIR" "$ROOT" <<'PY'
+import os, subprocess, sys
+usr, env, root = (os.path.realpath(x) for x in sys.argv[1:4])
+lib = os.path.join(usr, "lib")
+n = 0
+for base, _, names in os.walk(usr):
+    for f in names:
+        p = os.path.join(base, f)
+        if os.path.islink(p) or not os.path.isfile(p):
+            continue
+        with open(p, "rb") as fh:
+            if fh.read(4) != b"\x7fELF":
+                continue
+        rp = subprocess.run(["patchelf", "--print-rpath", p], capture_output=True, text=True).stdout.strip()
+        entries = [e for e in rp.split(":") if e]
+        rel = os.path.relpath(lib, base)
+        origin = "$ORIGIN" + ("" if rel == "." else "/" + rel)
+        bad = [e for e in entries if e.startswith(env) or e.startswith(root)]
+        if bad or (not entries and (os.sep + "bin" + os.sep in p or base == lib)):
+            new = [origin] + [e for e in entries if e not in bad and e != origin]
+            subprocess.run(["patchelf", "--set-rpath", ":".join(new), p], check=True)
+            n += 1
+print("RPATH angepasst:", n)
+PY
+echo "== Prüfen: fehlende Bibliotheken"
+missing="$(find "$USR/bin" "$USR/lib" -type f \( -name '*.so*' -o -path '*/bin/*' \) -print0 | xargs -0 ldd 2>/dev/null | grep 'not found' | sort | uniq -c || true)"
+if [ -n "$missing" ]; then echo "$missing" | head -30; fi
 echo "== Programmsymbol, Startskript, Desktop-Datei"
 cp "$LIN/AppRun" "$APPDIR/AppRun"
 chmod a+x "$APPDIR/AppRun"

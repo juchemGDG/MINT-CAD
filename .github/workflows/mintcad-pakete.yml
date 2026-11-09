@@ -40,7 +40,9 @@ jobs:
       - name: Bauen
         run: pixi run build-release
       - name: AppImage erzeugen
-        run: tools/mintcad/make_linux_appimage.sh
+        run: |
+          sudo apt-get install -y patchelf
+          tools/mintcad/make_linux_appimage.sh
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: MINT-CAD-Linux
