@@ -1,0 +1,8 @@
+# MINT-CAD: NSIS mit "Large strings" und "Advanced logging" (wie in package/rattler-build/pixi.toml), nur zum Bau des Windows-Installers
+[workspace]
+name = "mintcad-nsis"
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[dependencies]
+nsis = { version = "*", build = "*_log*" }

@@ -11,6 +11,13 @@ Gebaut wird auf einem Rechner mit dem jeweiligen System. Der Quellordner (Branch
 
 Alle Skripte legen zusätzlich eine `.sha256`-Datei an. **Stand: Windows- und Linux-Skripte sind geschrieben, aber noch nicht auf den Zielsystemen getestet.**
 
+## Automatisch auf GitHub bauen
+Der Workflow `.github/workflows/mintcad-pakete.yml` baut beide Pakete auf GitHub-Rechnern (Ubuntu 22.04 und Windows 2022).
+Start: Repository > *Actions* > *MINT-CAD Pakete* > *Run workflow* (Systeme wählbar). Ergebnis: Dateien unter *Artifacts* des Laufs
+(30 bis 90 Tage abrufbar). Mit einem Release-Tag im Eingabefeld hängt der Lauf die Dateien an ein vorhandenes, veröffentlichtes Release an
+(bei einem Entwurf ohne Tag stattdessen die Artifacts herunterladen und von Hand hochladen).
+Ein Lauf dauert mehrere Stunden. Die FreeCAD-eigenen Workflows und Dependabot wurden entfernt (sie stehen unverändert in der Historie).
+
 ## Gemeinsame Voraussetzung
 [pixi](https://pixi.sh) installieren, dann im Quellordner `pixi install`.
 

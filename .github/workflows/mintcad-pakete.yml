@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# MINT-CAD: baut das Linux-AppImage und den Windows-Installer auf GitHub-Rechnern.
+# Start von Hand: Actions > "MINT-CAD Pakete" > Run workflow. (Die FreeCAD-eigenen Workflows wurden entfernt.)
+# Ergebnis: Dateien unter "Artifacts" des Laufs; mit Eintrag "Release-Tag" zusätzlich am (Entwurfs-)Release.
+name: MINT-CAD Pakete
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag eines vorhandenen Releases (auch Entwurf), an das die Pakete angehängt werden. Leer = nur Artifacts."
+        required: false
+        default: ""
+      systeme:
+        description: "Welche Pakete bauen?"
+        type: choice
+        default: beide
+        options: [beide, nur-linux, nur-windows]
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    if: ${{ inputs.systeme != 'nur-windows' }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    steps:
+      - name: Speicherplatz freigeben
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: recursive
+      - uses: prefix-dev/setup-pixi@82d477f15f3a381dbcc8adc1206ce643fe110fb7 # v0.9.3
+        with:
+          pixi-version: v0.59.0
+          cache: false
+      - name: Konfigurieren
+        run: tools/mintcad/configure-linux.sh
+      - name: Bauen
+        run: pixi run build-release
+      - name: AppImage erzeugen
+        run: tools/mintcad/make_linux_appimage.sh
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: MINT-CAD-Linux
+          path: |
+            build/mintcad-dist-linux/*.AppImage
+            build/mintcad-dist-linux/*.sha256
+      - name: An Release anhängen
+        if: ${{ inputs.release_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ inputs.release_tag }}" build/mintcad-dist-linux/*.AppImage build/mintcad-dist-linux/*.sha256 --clobber
+
+  windows:
+    if: ${{ inputs.systeme != 'nur-linux' }}
+    runs-on: windows-2022
+    timeout-minutes: 350
+    steps:
+      - run: git config --global core.longpaths true
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: recursive
+      - uses: prefix-dev/setup-pixi@82d477f15f3a381dbcc8adc1206ce643fe110fb7 # v0.9.3
+        with:
+          pixi-version: v0.59.0
+          cache: false
+      - name: Konfigurieren
+        shell: cmd
+        run: tools\mintcad\configure-windows.bat
+      - name: Bauen
+        run: pixi run build-release
+      - name: NSIS (mit Large strings) bereitstellen
+        run: pixi install --manifest-path tools/mintcad/windows/nsis/pixi.toml
+      - name: Installer erzeugen
+        shell: bash
+        run: |
+          export PATH="$PATH:/c/Program Files/7-Zip"
+          export MAKENSIS="$PWD/tools/mintcad/windows/nsis/.pixi/envs/default/NSIS/makensis.exe"
+          tools/mintcad/make_windows_installer.sh
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: MINT-CAD-Windows
+          path: |
+            build/mintcad-dist-windows/*-installer.exe
+            build/mintcad-dist-windows/*.7z
+            build/mintcad-dist-windows/*.sha256
+      - name: An Release anhängen
+        if: ${{ inputs.release_tag != '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ inputs.release_tag }}" build/mintcad-dist-windows/*-installer.exe build/mintcad-dist-windows/*.7z build/mintcad-dist-windows/*.sha256 --clobber
