@@ -56,6 +56,7 @@ cp -a "$ENVDIR/Library/Mod" "$APP/Mod"
 mkdir -p "$APP/doc"
 cp -a "$ENVDIR"/Library/doc/{ThirdPartyLibraries.html,LICENSE.html} "$APP/doc/" 2>/dev/null || true
 cp "$ROOT/LICENSE" "$APP/doc/LICENSE.txt"
+cp "$ROOT/THIRD-PARTY.md" "$ROOT/THIRD-PARTY-PACKAGES.md" "$APP/doc/"
 
 echo "== Unnötiges entfernen"
 find "$APP" \( -name '*.a' -o -name '*.lib' -o -name '*arm*.exe' -o -name '__pycache__' -prune \) -exec rm -rf {} + 2>/dev/null || true

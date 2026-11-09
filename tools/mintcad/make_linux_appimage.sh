@@ -57,7 +57,7 @@ mkdir -p "$USR/share/icons/hicolor/scalable/apps" "$USR/share/icons/hicolor/256x
 cp "$LIN/de.mint-checker.MINT-CAD.svg" "$USR/share/icons/hicolor/scalable/apps/"
 cp "$LIN/de.mint-checker.MINT-CAD.png" "$USR/share/icons/hicolor/256x256/apps/"
 cp "$LIN/de.mint-checker.MINT-CAD.desktop" "$USR/share/applications/"
-cp "$ROOT/LICENSE" "$APPDIR/LICENSE"
+cp "$ROOT/LICENSE" "$ROOT/THIRD-PARTY.md" "$ROOT/THIRD-PARTY-PACKAGES.md" "$APPDIR/"
 ln -sf de.mint-checker.MINT-CAD.png "$APPDIR/.DirIcon"
 pixi list -e default > "$APPDIR/packages.txt" 2>/dev/null || true
 

@@ -52,7 +52,7 @@ rm -rf bin_tmp
 if [ -f bin/pip ]; then sed -i '' '1s|.*|#!/usr/bin/env python|' bin/pip; fi
 
 cp "$MAC/mintcad.icns" "$RES/mintcad.icns"
-cp "$ROOT/LICENSE" "$RES/LICENSE"
+cp "$ROOT/LICENSE" "$ROOT/THIRD-PARTY.md" "$ROOT/THIRD-PARTY-PACKAGES.md" "$RES/"
 
 echo "== Pfade der Bibliotheken bereinigen"
 cd "$ROOT"

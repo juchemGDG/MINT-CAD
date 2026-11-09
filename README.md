@@ -14,6 +14,7 @@ Der Branch `nitcad` enthält die Änderungen; das Tag `1.1.4` ist die unverände
 [README-FreeCAD.md](README-FreeCAD.md).
 
 ## Selbst bauen
+- Fremdsoftware und Lizenzen: [THIRD-PARTY.md](THIRD-PARTY.md)
 - macOS: [docs/nitcad/BUILD-macos.md](docs/nitcad/BUILD-macos.md)
 - Windows und Linux: [docs/nitcad/BUILD-windows-linux.md](docs/nitcad/BUILD-windows-linux.md)
 - Plan und Änderungen gegenüber FreeCAD: [docs/nitcad/PLAN.md](docs/nitcad/PLAN.md)
