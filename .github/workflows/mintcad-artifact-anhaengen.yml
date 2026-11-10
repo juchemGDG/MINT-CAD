@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# MINT-CAD: hängt die Dateien eines früheren Paketlaufs an ein (Entwurfs-)Release an,
+# ohne neu zu bauen. Start von Hand: Actions > "MINT-CAD Artifact anhängen" > Run workflow.
+name: MINT-CAD Artifact anhängen
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Nummer des Paketlaufs (aus der Adresse .../actions/runs/NUMMER)"
+        required: true
+      artifact:
+        description: "Name des Artifacts"
+        required: true
+        default: MINT-CAD-Linux
+      release_tag:
+        description: "Tag des Releases (auch Entwurf), an das die Dateien angehängt werden"
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  anhaengen:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Artifact laden
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "${{ inputs.run_id }}" -R "${{ github.repository }}" -n "${{ inputs.artifact }}" -D dl
+      - name: An Release anhängen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la dl
+          gh release upload "${{ inputs.release_tag }}" dl/* -R "${{ github.repository }}" --clobber
