@@ -26,7 +26,15 @@ Erste Zielplattform: macOS (arm64). Später: Windows, Linux.
 6. Unterrichtshilfen                                                <- erledigt: Vorlagen A4 quer/hoch + A3 quer (Schulschriftfeld), Beispiele Winkelstück/Welle/Platte, Kurzanleitung (Hilfe-Menü);
    Hilfsskripte: tools/mintcad/make_templates.py, make_examples.py
 7. Branding & Paketierung (Name, Logo, Installer macOS/Windows/Linux)  <- macOS-DMG fertig; Windows-Installer und Linux-AppImage: Skripte geschrieben, Test auf Zielsystem offen (docs/nitcad/BUILD-windows-linux.md)
-8. Test mit Schülern, Upstream-Pflege
+8. Fusion-artige Bedienung (nur Python in Mod/MintCAD)               <- umgesetzt, Test mit Schülern offen
+   - MintCADFusion.py: Navigation (Revit-Stil = MMB schieben, Umschalt+MMB drehen, Zoom zum Zeiger), Einbuchstaben-Kürzel
+     (E Pad, P Tasche, R Drehen, H Bohrung, F Rundung, C Fase, M Spiegeln, U Muster, S Skizze; in der Skizze L/T/O/A/W/D/X),
+     Schnellleiste nach "Skizze beenden" (Pad/Tasche/Drehen/Nut). Abschalten: MintCAD/FusionShortcuts=false
+   - MintCADTimeline.py: Zeitleiste unten (Part Design): Klick/Doppelklick/Rechtsklick (umbenennen, unterdrücken, zurückrollen, löschen). MintCAD/Timeline=false
+   - MintCADRadial.py: Radialmenü auf Rechtsklick in Part Design (nicht im Skizzenmodus); "Mehr ..." = normales Menü. MintCAD/Radial=false
+   - MintCADParams.py: Parameter-Dialog (Tabellenblatt "Parameter" + alle Skizzenmaße/Feature-Längen, Formeln mit =)
+   Bewusst nicht: direktes Ziehen (Pad hat es schon), Kern-Fehlertoleranz (topologisches Benennungsproblem, C++/OCC)
+9. Test mit Schülern, Upstream-Pflege
 
 ## Commit-Konventionen
 `docs:`, `build:`, `feat:`, `style:`, `chore:` – ein Thema pro Commit, Start jeweils geprüft.
