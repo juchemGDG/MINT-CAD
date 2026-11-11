@@ -147,6 +147,7 @@ REPLACE_GROUPS = {
 ADD_COMMANDS = [
     ("PartDesign_Plane", "Part Design Helper Features"),  # Bezugsebene
     ("PartDesign_Line", "Part Design Helper Features"),  # Referenzlinie
+    ("MintCAD_Parameters", "Part Design Helper Features"),  # Parameter-Dialog (MintCADParams.py)
     ("TechDraw_ProjectionGroup", "TechDraw Views"),  # Ansichtsgruppe (Hauptansicht + Projektionen)
 ]
 

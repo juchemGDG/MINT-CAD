@@ -7,6 +7,10 @@ SET(MintCAD_SRCS
     MintCADSimplify.py
     MintCADHelp.py
     MintCADRibbon.py
+    MintCADFusion.py
+    MintCADTimeline.py
+    MintCADRadial.py
+    MintCADParams.py
 )
 SOURCE_GROUP("" FILES ${MintCAD_SRCS})
 
