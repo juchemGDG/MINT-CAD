@@ -67,6 +67,7 @@ SKETCH_TAB = (
 
 # Kurze deutsche Beschriftungen für große Schaltflächen (Befehl -> Text); sonst die FreeCAD-Übersetzung
 LABELS = {
+    "MintCAD_Parameters": "Parameter",
     "PartDesign_Body": "Körper",
     "PartDesign_CompSketches": "Skizze",
     "Sketcher_ValidateSketch": "Prüfen",
@@ -105,6 +106,7 @@ LABELS = {
 
 LARGE_ICON = 36
 SMALL_ICON = 28
+COMPACT_ICON = 36  # Gruppen mit nur einer Zeile von Icons (z. B. Ansicht) wie die großen Schaltflächen
 LARGE_MAX_BUTTONS = 7  # Gruppen mit mehr Schaltflächen werden kompakt (nur Icons) dargestellt
 BUTTON_WIDTH = 84
 RIBBON_HEIGHT = 128
@@ -157,13 +159,14 @@ def _command_icon(action, size):
 class _ProxyButton(QtWidgets.QToolButton):
     """Schaltfläche, die eine bestehende QAction auslöst und deren Zustand spiegelt."""
 
-    def __init__(self, action, native_button, large, parent=None):
+    def __init__(self, action, native_button, large, parent=None, compact_size=None):
         super().__init__(parent)
         self._action = action
         self._large = large
+        self._icon = LARGE_ICON if large else (compact_size or SMALL_ICON)
         self.setAutoRaise(True)
         self.setCheckable(action.isCheckable())
-        self.setIconSize(QtCore.QSize(LARGE_ICON if large else SMALL_ICON, LARGE_ICON if large else SMALL_ICON))
+        self.setIconSize(QtCore.QSize(self._icon, self._icon))
         if large:
             self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             self.setFixedWidth(BUTTON_WIDTH)
@@ -182,7 +185,7 @@ class _ProxyButton(QtWidgets.QToolButton):
 
     def _sync(self):
         a = self._action
-        self.setIcon(_command_icon(a, LARGE_ICON if self._large else SMALL_ICON))
+        self.setIcon(_command_icon(a, self._icon))
         self.setEnabled(a.isEnabled())
         self.setToolTip(a.toolTip() or a.text())
         self.setStatusTip(a.statusTip())
@@ -218,7 +221,7 @@ class _Group(QtWidgets.QWidget):
         rows = 1 if (large or len(items) <= 8) else 2
         cols = (len(items) + rows - 1) // rows
         for i, (a, w) in enumerate(items):
-            btn = _ProxyButton(a, w, large, self)
+            btn = _ProxyButton(a, w, large, self, COMPACT_ICON if rows == 1 else None)
             grid.addWidget(btn, i // cols if rows > 1 else 0, i % cols if rows > 1 else i)
         lay.addLayout(grid)
         lay.addStretch(1)
